@@ -1,3 +1,7 @@
+#
+# TODO: - add samples
+#	- make static subpackage
+#
 Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx
@@ -18,12 +22,15 @@ BuildRequires:	automake
 BuildRequires:	bison
 BuildRequires:	flex
 BuildRequires:	hdf-devel
+BuildRequires:	libjpeg-devel
 BuildRequires:	libtool
 BuildRequires:	libtiff-devel
 BuildRequires:	motif-devel
 BuildRequires:	netcdf-devel
 Requires:	%{name}-libs = %{version}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		specflags_ia32	-fomit-frame-pointer
 
 %description
 OpenDX is a uniquely powerful, full-featured software package for the
