@@ -18,7 +18,7 @@ Patch1:		%{name}-nolibs.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel
 BuildRequires:	OpenGL-devel-base
-BuildRequires:	autoconf
+BuildRequires:	autoconf >= 2.57
 BuildRequires:	automake
 BuildRequires:	bison
 BuildRequires:	flex
