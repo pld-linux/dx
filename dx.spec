@@ -44,7 +44,7 @@ creating visualizations.
 OpenDX jest w pe³ni funkcjonalnym, o unikalnych mo¿liwo¶ciach,
 pakietem do wizualizacji danych naukowych, in¿ynierskich i
 analitycznych. Zosta³ zaprojektowany w sposób otwarty, w oparciu o
-standardowe ¶rodowiska interfejstów. Jego przemy¶lany model danych
+standardowe ¶rodowiska interfejsów. Jego przemy¶lany model danych
 daje u¿ytkownikom du¿± elastyczno¶æ w tworzeniu wizualizacji.
 
 %package libs
