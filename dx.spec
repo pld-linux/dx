@@ -14,6 +14,7 @@ Vendor:		PLD
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-4.0.8.tar.gz
 Patch0:		%{name}-DESTDIR.patch
+Patch1:		%{name}-acfix.patch
 URL:		http://www.opendx.org	
 #BuildPrereq:	
 #Requires:	
@@ -34,7 +35,8 @@ creating visualizations.
 
 %prep
 %setup  -q
-%patch -p1
+%patch0 -p1
+%patch1 -p1
 
 %build
 autoheader;autoconf;automake; 
