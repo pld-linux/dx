@@ -1,15 +1,15 @@
 Summary:	Excelent tool to making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
-Name:		dx	
+Name:		dx
 Version:	4.1.3
 Release:	1
-Group:		Applications
 License:	IPL
+Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
 Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-acfix.patch
-URL:		http://www.opendx.org	
+URL:		http://www.opendx.org/
 BuildRequires:	flex
 BuildRequires:	ImageMagick-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -17,7 +17,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define         _prefix         /usr/X11R6
 %define         _mandir         %{_prefix}/man
 
-%description 
+%description
 OpenDX is a uniquely powerful, full-featured software package for the
 visualization of scientific, engineering and analytical data: Its open
 system design is built on a standard interface environments. And its
@@ -45,7 +45,7 @@ rm -f missing
 %configure2_13 \
 	--prefix=%{_prefix} \
 	--datadir=%{_datadir} \
-	--mandir=%{_mandir}	
+	--mandir=%{_mandir}
 
 %{__make}
 
@@ -58,7 +58,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
 
-gzip -9nf README ChangeLog 
+gzip -9nf README ChangeLog
 
 %clean
 rm -rf $RPM_BUILD_ROOT
