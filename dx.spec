@@ -12,6 +12,7 @@ Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
 Patch0:		%{name}-DESTDIR.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel
+BuildRequires:	OpenGL-devel-base
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	flex
