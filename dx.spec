@@ -4,8 +4,6 @@ Name:		dx
 Version:	4.1.3
 Release:	1
 Group:		Applications
-Group(de):	Applikationen
-Group(pl):	Aplikacje
 License:	IPL
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
