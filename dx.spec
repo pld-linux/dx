@@ -1,6 +1,5 @@
 #
 # TODO: - add samples
-#	- make static subpackage
 #	- add desktop file
 #
 Summary:	Excellent tool for making visualization of data
@@ -70,6 +69,18 @@ OpenDX development files.
 %description devel -l pl
 Pliki nag³ówkowe OpenDX oraz inne pliki, potrzebne do budowania.
 
+%package static
+Summary:	OpenDX static libraries
+Summary(pl):	Biblioteki statyczne OpenDX
+Group:		Development/Libraries
+Requires:	%{name}-devel = %{version}
+
+%description static
+OpenDX static libraries.
+
+%description static -l pl
+Biblioteki statyczne OpenDX.
+
 %package doc
 Summary:	OpenDX documentation
 Summary(pl):	Dokumentacja OpenDX
@@ -95,7 +106,7 @@ rm -f missing aclocal.m4
 %configure \
 	--prefix=%{_datadir} \
 	--enable-shared \
-	--disable-static \
+	--enable-static \
 	--disable-dependency-tracking \
 	--enable-smp-linux \
 	--enable-new-keylayout \
@@ -142,6 +153,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_libdir}/dx/*.mak
 %exclude %{_libdir}/dx/*.la
 %exclude %{_libdir}/dx/*.so
+%exclude %{_libdir}/dx/*.a
 
 %files devel
 %defattr(644,root,root,755)
@@ -149,6 +161,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/dx/*.mak
 %{_libdir}/dx/*.la
 %{_libdir}/dx/*.so
+
+%files static
+%defattr(644,root,root,755)
+%{_libdir}/dx/*.a
 
 %files doc
 %defattr(644,root,root,755)
