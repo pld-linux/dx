@@ -1,16 +1,15 @@
 Summary:	Excelent tool to making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx
-Version:	4.2.0
+Version:	4.3.0
 Release:	1
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
-# Source0-md5:	a57c5ee29457d5cb4745986f696ea19e
+# Source0-md5:	882ce699608f527ab9849fc47d837aa8
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
-# Source1-md5:	530feaf2a90011022fd778c951525377
+# Source1-md5:	5d691eef81c19f22132c5f25e3831452
 Patch0:		%{name}-DESTDIR.patch
-Patch1:		%{name}-ac_fix.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel
 BuildRequires:	autoconf
@@ -35,7 +34,6 @@ daje u¿ytkownikom du¿± elastyczno¶æ w tworzeniu wizualizacji.
 %prep
 %setup  -q
 %patch0 -p1
-%patch1 -p1
 
 %build
 rm -f missing aclocal.m4
