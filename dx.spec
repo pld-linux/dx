@@ -6,7 +6,9 @@ Release:	1
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
+# Source0-md5:	a57c5ee29457d5cb4745986f696ea19e
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
+# Source1-md5:	530feaf2a90011022fd778c951525377
 Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-ac_fix.patch
 URL:		http://www.opendx.org/
