@@ -18,7 +18,6 @@ BuildRequires:	automake
 BuildRequires:	flex
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-
 %description
 OpenDX is a uniquely powerful, full-featured software package for the
 visualization of scientific, engineering and analytical data: Its open
@@ -55,7 +54,8 @@ rm -f missing aclocal.m4
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%{__make} install DESTDIR=$RPM_BUILD_ROOT
+%{__make} install \
+	DESTDIR=$RPM_BUILD_ROOT
 
 ln -sf %{_bindir} $RPM_BUILD_ROOT%{_datadir}/dx/bin
 ln -sf %{_bindir} $RPM_BUILD_ROOT%{_datadir}/dx/bin_linux
