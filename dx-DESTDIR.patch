@@ -1,6 +1,6 @@
-diff -urN dx-4.1.0/bin/Makefile.am dx-4.1.0-DESTDIR/bin/Makefile.am
---- dx-4.1.0/bin/Makefile.am	Tue Dec 14 05:18:10 1999
-+++ dx-4.1.0-DESTDIR/bin/Makefile.am	Sun Aug 27 15:43:37 2000
+diff -urN dx-4.2.0.orig/bin/Makefile.am dx-4.2.0/bin/Makefile.am
+--- dx-4.2.0.orig/bin/Makefile.am	Thu Apr 11 01:32:53 2002
++++ dx-4.2.0/bin/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -8,21 +8,21 @@ diff -urN dx-4.1.0/bin/Makefile.am dx-4.1.0-DESTDIR/bin/Makefile.am
 +dxbindir = $(prefix)/bin
  bindir = $(prefix)/bin
  
- EXTRA_DIST = dxworker dx mdf2c
-diff -urN dx-4.1.0/doc/Makefile.am dx-4.1.0-DESTDIR/doc/Makefile.am
---- dx-4.1.0/doc/Makefile.am	Mon Apr  5 13:57:03 1999
-+++ dx-4.1.0-DESTDIR/doc/Makefile.am	Sun Aug 27 17:11:47 2000
+ EXTRA_DIST = dxworker dx mdf2c url_handler.sh
+diff -urN dx-4.2.0.orig/doc/Makefile.am dx-4.2.0/doc/Makefile.am
+--- dx-4.2.0.orig/doc/Makefile.am	Mon Apr  5 13:57:03 1999
++++ dx-4.2.0/doc/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
 -docdir = $(prefix)/dx/doc
-+docdir = $(prefix)/share/doc/dx
++docdir = $(datadir)/doc/dx/
  
  doc_DATA = \
  	README README_SMP README_alphax README_aviion README_hp700 \
-diff -urN dx-4.1.0/fonts/Makefile.am dx-4.1.0-DESTDIR/fonts/Makefile.am
---- dx-4.1.0/fonts/Makefile.am	Tue Jun 15 17:54:34 1999
-+++ dx-4.1.0-DESTDIR/fonts/Makefile.am	Sun Aug 27 14:30:06 2000
+diff -urN dx-4.2.0.orig/fonts/Makefile.am dx-4.2.0/fonts/Makefile.am
+--- dx-4.2.0.orig/fonts/Makefile.am	Tue Jun 15 17:54:34 1999
++++ dx-4.2.0/fonts/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -31,60 +31,79 @@ diff -urN dx-4.1.0/fonts/Makefile.am dx-4.1.0-DESTDIR/fonts/Makefile.am
  
  font_DATA = \
  	Readme area.dx cyril_d.dx \
-diff -urN dx-4.1.0/help/Makefile.am dx-4.1.0-DESTDIR/help/Makefile.am
---- dx-4.1.0/help/Makefile.am	Wed Feb  2 23:54:07 2000
-+++ dx-4.1.0-DESTDIR/help/Makefile.am	Sun Aug 27 14:23:20 2000
+diff -urN dx-4.2.0.orig/help/Makefile.am dx-4.2.0/help/Makefile.am
+--- dx-4.2.0.orig/help/Makefile.am	Thu May  2 17:42:31 2002
++++ dx-4.2.0/help/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
 -helpdir = $(prefix)/dx/help
-+helpdir = $(DESTDIR)/$(datadir)/dx/hel
++helpdir = $(datadir)/dx/help
  
- EXTRA_DIST = help.tar
- 
-diff -urN dx-4.1.0/html/Makefile.am dx-4.1.0-DESTDIR/html/Makefile.am
---- dx-4.1.0/html/Makefile.am	Wed Dec 15 09:07:12 1999
-+++ dx-4.1.0-DESTDIR/html/Makefile.am	Sun Aug 27 17:23:35 2000
+ EXTRA_DIST = $(helpfiles1) $(helpfiles2) $(helpfiles3) $(helpfiles4) $(helpfiles5)  \
+ 	$(helpfiles6) $(helpfiles7) $(helpfiles8) $(helpfiles9) $(helpfiles10)  \
+diff -urN dx-4.2.0.orig/html/Makefile.am dx-4.2.0/html/Makefile.am
+--- dx-4.2.0.orig/html/Makefile.am	Tue Apr 30 19:51:33 2002
++++ dx-4.2.0/html/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
 -htmldir = $(prefix)/dx/html
-+htmldir = $(prefix)/share/doc/dx/html
++htmldir = $(datadir)/doc/dx/html
  
- html_DATA = README.htm README_SMP.htm README_alphax.htm \
- 	README_hp700.htm README_ibm6000.htm README_intelnt.htm \
-diff -urN dx-4.1.0/include/Makefile.am dx-4.1.0-DESTDIR/include/Makefile.am
---- dx-4.1.0/include/Makefile.am	Wed May 26 01:35:16 1999
-+++ dx-4.1.0-DESTDIR/include/Makefile.am	Sun Aug 27 14:43:31 2000
+ SUBDIRS = pages images
+ 
+diff -urN dx-4.2.0.orig/html/images/Makefile.am dx-4.2.0/html/images/Makefile.am
+--- dx-4.2.0.orig/html/images/Makefile.am	Mon Apr  1 11:04:03 2002
++++ dx-4.2.0/html/images/Makefile.am	Tue Jul 16 22:19:38 2002
+@@ -1,5 +1,5 @@
+ 
+-imagesdir = $(prefix)/dx/html/images
++imagesdir = $(datadir)/doc/dx/html/images
+ 
+ images1 = \
+ 	3dcurs.gif adctlpt.gif arch.gif autoax.gif autoexp.gif		\
+diff -urN dx-4.2.0.orig/html/pages/Makefile.am dx-4.2.0/html/pages/Makefile.am
+--- dx-4.2.0.orig/html/pages/Makefile.am	Mon Apr  1 11:04:03 2002
++++ dx-4.2.0/html/pages/Makefile.am	Tue Jul 16 22:19:38 2002
+@@ -1,4 +1,4 @@
+-pagesdir = $(prefix)/dx/html/pages
++pagesdir = $(datadir)/doc/dx/html/pages
+ 
+ pages1 = \
+ 	insgu002.htm insgu003.htm insgu004.htm insgu005.htm insgu006.htm \
+diff -urN dx-4.2.0.orig/include/Makefile.am dx-4.2.0/include/Makefile.am
+--- dx-4.2.0.orig/include/Makefile.am	Fri Jun 29 15:08:15 2001
++++ dx-4.2.0/include/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,3 +1,3 @@
 -dxincdir = $(prefix)/dx/include
-+dxincdir = $(includedir)
++dxincdir = $(prefix)/include/dx
  SUBDIRS = dx
- dxinc_HEADERS = dxl.h dxconfig.h
-diff -urN dx-4.1.0/include/dx/Makefile.am dx-4.1.0-DESTDIR/include/dx/Makefile.am
---- dx-4.1.0/include/dx/Makefile.am	Wed May 26 01:35:16 1999
-+++ dx-4.1.0-DESTDIR/include/dx/Makefile.am	Sun Aug 27 14:43:39 2000
+ dxinc_HEADERS = dxl.h dxconfig.h dxstereo.h
+diff -urN dx-4.2.0.orig/include/dx/Makefile.am dx-4.2.0/include/dx/Makefile.am
+--- dx-4.2.0.orig/include/dx/Makefile.am	Wed May 26 01:35:16 1999
++++ dx-4.2.0/include/dx/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
 -dxincdir = $(prefix)/dx/include/dx
-+dxincdir = $(includedir)/dx
++dxincdir = $(prefix)/include/dx
   
  dxinc_HEADERS = \
  	UserInteractors.h advanced.h arch.h array.h arrayhandles.h \
-diff -urN dx-4.1.0/lib/Makefile.am dx-4.1.0-DESTDIR/lib/Makefile.am
---- dx-4.1.0/lib/Makefile.am	Fri Aug 13 02:15:26 1999
-+++ dx-4.1.0-DESTDIR/lib/Makefile.am	Sun Aug 27 15:47:27 2000
+diff -urN dx-4.2.0.orig/lib/Makefile.am dx-4.2.0/lib/Makefile.am
+--- dx-4.2.0.orig/lib/Makefile.am	Fri Mar 29 15:42:54 2002
++++ dx-4.2.0/lib/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,5 +1,5 @@
  
--libdir = $(prefix)/dx/lib
+-libsdir = $(prefix)/dx/lib
++libsdir = $(prefix)/lib/dx
  
-+libdir	= $(datadir)/dx/lib/
- EXTRA_DIST = mdf2c.awk messages dx.mdf colors.txt dxfSaveCurrentImage.net dxrc dxexec.exp outboard.c
- lib_DATA = $(EXTRA_DIST)
-diff -urN dx-4.1.0/man/catl/Makefile.am dx-4.1.0-DESTDIR/man/catl/Makefile.am
---- dx-4.1.0/man/catl/Makefile.am	Mon Apr  5 13:56:00 1999
-+++ dx-4.1.0-DESTDIR/man/catl/Makefile.am	Sun Aug 27 14:58:51 2000
+ libs_DATA = mdf2c.awk messages colors.txt dxfSaveCurrentImage.net dxrc dxexec.exp outboard.c
+ EXTRA_DIST = $(libs_DATA)
+diff -urN dx-4.2.0.orig/man/catl/Makefile.am dx-4.2.0/man/catl/Makefile.am
+--- dx-4.2.0.orig/man/catl/Makefile.am	Mon Apr  5 13:56:00 1999
++++ dx-4.2.0/man/catl/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -93,140 +112,183 @@ diff -urN dx-4.1.0/man/catl/Makefile.am dx-4.1.0-DESTDIR/man/catl/Makefile.am
  
  cat_DATA = dx.l
  EXTRA_DIST = $(cat_DATA)
-diff -urN dx-4.1.0/man/manl/Makefile.am dx-4.1.0-DESTDIR/man/manl/Makefile.am
---- dx-4.1.0/man/manl/Makefile.am	Mon Apr  5 13:55:25 1999
-+++ dx-4.1.0-DESTDIR/man/manl/Makefile.am	Sun Aug 27 16:42:52 2000
+diff -urN dx-4.2.0.orig/man/manl/Makefile.am dx-4.2.0/man/manl/Makefile.am
+--- dx-4.2.0.orig/man/manl/Makefile.am	Mon May 20 06:49:40 2002
++++ dx-4.2.0/man/manl/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
--mandir = $(prefix)/dx/man/manl
-+mandir = $(prefix)/man/man1
+-mandir = $(prefix)/dx/man
++mandir = $(datadir)/man
  
- man_DATA = dx.l
- EXTRA_DIST = $(man_DATA)
-diff -urN dx-4.1.0/src/exec/dxexec/Makefile.am dx-4.1.0-DESTDIR/src/exec/dxexec/Makefile.am
---- dx-4.1.0/src/exec/dxexec/Makefile.am	Fri Oct  1 20:42:22 1999
-+++ dx-4.1.0-DESTDIR/src/exec/dxexec/Makefile.am	Sun Aug 27 15:03:49 2000
+ man_MANS = dx.l
+ EXTRA_DIST = $(man_MANS)
+diff -urN dx-4.2.0.orig/src/exec/dxexec/Makefile.am dx-4.2.0/src/exec/dxexec/Makefile.am
+--- dx-4.2.0.orig/src/exec/dxexec/Makefile.am	Fri Apr 19 02:42:28 2002
++++ dx-4.2.0/src/exec/dxexec/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -5,7 +5,7 @@
- EXPARG=@EXPARG@
- EXP=$BUILDBASE/lib/dxexec.exp
+ EXP=${top_srcdir}/lib/dxexec.exp
+ WEXP=${top_srcdir}/lib/dxexec.def
  
 -dxbindir = $(prefix)/dx/bin_@ARCH@
-+dxbindir = $(datadir)/dx/bin_@ARCH@
++dxbindir = $(prefix)/bin
  dxbin_PROGRAMS = dxexec
  noinst_LIBRARIES = libDXEXEC.a
  
-diff -urN dx-4.1.0/src/exec/dxmods/Makefile.am dx-4.1.0-DESTDIR/src/exec/dxmods/Makefile.am
---- dx-4.1.0/src/exec/dxmods/Makefile.am	Thu Jan  6 22:06:54 2000
-+++ dx-4.1.0-DESTDIR/src/exec/dxmods/Makefile.am	Sun Aug 27 15:12:35 2000
+diff -urN dx-4.2.0.orig/src/exec/dxmods/Makefile.am dx-4.2.0/src/exec/dxmods/Makefile.am
+--- dx-4.2.0.orig/src/exec/dxmods/Makefile.am	Thu May 31 16:50:13 2001
++++ dx-4.2.0/src/exec/dxmods/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -2,7 +2,7 @@
  
- INCLUDES = -I../../../include -I../dpexec -I/usr/include -I/usr/local/include -D@ARCH@
+ INCLUDES = -I${top_srcdir}/include -I${srcdir}/../dpexec -D@ARCH@
  
 -dxmdfdir = $(prefix)/dx/lib
-+dxmdfdir = $(datadir)/lib/
++dxmdfdir = $(prefix)/lib/dx
  noinst_LIBRARIES = libDXMODS.a libusercm.a
  SUFFIXES = .c .y .c .s .h .o 
  
-diff -urN dx-4.1.0/src/exec/libdx/Makefile.am dx-4.1.0-DESTDIR/src/exec/libdx/Makefile.am
---- dx-4.1.0/src/exec/libdx/Makefile.am	Wed Dec 15 07:34:46 1999
-+++ dx-4.1.0-DESTDIR/src/exec/libdx/Makefile.am	Sun Aug 27 15:03:21 2000
-@@ -2,7 +2,7 @@
- 
- INCLUDES = -I../../../include  -D@ARCH@
+diff -urN dx-4.2.0.orig/src/exec/libdx/Makefile.am dx-4.2.0/src/exec/libdx/Makefile.am
+--- dx-4.2.0.orig/src/exec/libdx/Makefile.am	Sat Feb 16 16:36:57 2002
++++ dx-4.2.0/src/exec/libdx/Makefile.am	Tue Jul 16 22:19:38 2002
+@@ -3,7 +3,7 @@
+ #INCLUDES = -I../../../include  -D@ARCH@
+ INCLUDES = -I${top_srcdir}/include  -D@ARCH@
  
 -dxlibdir = $(prefix)/dx/lib_@ARCH@
-+dxlibdir = $(datadir)/dx/lib_@ARCH@
++dxlibdir = $(prefix)/lib
  
  noinst_LIBRARIES = libLIBDX.a libcallm.a
  dxlib_LIBRARIES = libDXlite.a 
-diff -urN dx-4.1.0/src/misc/Makefile.am dx-4.1.0-DESTDIR/src/misc/Makefile.am
---- dx-4.1.0/src/misc/Makefile.am	Mon Jan 17 23:52:31 2000
-+++ dx-4.1.0-DESTDIR/src/misc/Makefile.am	Sun Aug 27 15:08:31 2000
+diff -urN dx-4.2.0.orig/src/misc/Makefile.am dx-4.2.0/src/misc/Makefile.am
+--- dx-4.2.0.orig/src/misc/Makefile.am	Mon Nov 26 21:40:58 2001
++++ dx-4.2.0/src/misc/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -4,7 +4,7 @@
  
  dxbindir = $(prefix)/bin
  noinst_PROGRAMS = dxlocal
 -archmakdir = $(prefix)/dx/lib_$(ARCH)
-+archmakdir = $(datadir)/dx/lib_$(ARCH)
++archmakdir = $(prefix)/lib/dx/
  archmak_DATA = arch.mak
  
- dxlocal_SOURCES = dx.c 
-diff -urN dx-4.1.0/src/uipp/dxl/Makefile.am dx-4.1.0-DESTDIR/src/uipp/dxl/Makefile.am
---- dx-4.1.0/src/uipp/dxl/Makefile.am	Mon May  3 16:08:43 1999
-+++ dx-4.1.0-DESTDIR/src/uipp/dxl/Makefile.am	Sun Aug 27 15:46:58 2000
+ dxlocal_SOURCES = dx.c utils.c
+diff -urN dx-4.2.0.orig/src/uipp/dxl/Makefile.am dx-4.2.0/src/uipp/dxl/Makefile.am
+--- dx-4.2.0.orig/src/uipp/dxl/Makefile.am	Fri Jun  9 04:46:15 2000
++++ dx-4.2.0/src/uipp/dxl/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -2,7 +2,7 @@
  
- INCLUDES = -I../../../include  -D@ARCH@
+ INCLUDES = -I${top_srcdir}/include  -D@ARCH@
  
 -dxlibdir = $(prefix)/dx/lib_@ARCH@
 +dxlibdir = $(prefix)/lib
  
  dxlib_LIBRARIES = libDXL.a
  
-diff -urN dx-4.1.0/src/uipp/dxui/Makefile.am dx-4.1.0-DESTDIR/src/uipp/dxui/Makefile.am
---- dx-4.1.0/src/uipp/dxui/Makefile.am	Wed Sep  1 23:27:44 1999
-+++ dx-4.1.0-DESTDIR/src/uipp/dxui/Makefile.am	Sun Aug 27 15:46:09 2000
+diff -urN dx-4.2.0.orig/src/uipp/dxui/Makefile.am dx-4.2.0/src/uipp/dxui/Makefile.am
+--- dx-4.2.0.orig/src/uipp/dxui/Makefile.am	Sat Feb 16 16:36:58 2002
++++ dx-4.2.0/src/uipp/dxui/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -2,7 +2,7 @@
  
- INCLUDES = -I../base -I../../../include -I../dxuilib -D@ARCH@
+ INCLUDES = -I${srcdir}/../base -I${top_srcdir}/include -I${srcdir}/../dxuilib -D@ARCH@
  
 -dxbindir = $(prefix)/dx/bin_@ARCH@
 +dxbindir = $(prefix)/bin
  dxbin_PROGRAMS = dxui
  
  
-diff -urN dx-4.1.0/src/uipp/mb/Makefile.am dx-4.1.0-DESTDIR/src/uipp/mb/Makefile.am
---- dx-4.1.0/src/uipp/mb/Makefile.am	Mon May  3 16:08:58 1999
-+++ dx-4.1.0-DESTDIR/src/uipp/mb/Makefile.am	Sun Aug 27 15:44:20 2000
+diff -urN dx-4.2.0.orig/src/uipp/java/Makefile.am dx-4.2.0/src/uipp/java/Makefile.am
+--- dx-4.2.0.orig/src/uipp/java/Makefile.am	Thu May  2 20:47:47 2002
++++ dx-4.2.0/src/uipp/java/Makefile.am	Tue Jul 16 22:19:38 2002
+@@ -14,12 +14,12 @@
+ ## to the directory arg following the -d.  The
+ ## result is a place which is easy to jar up.
+ ##
+-javadxdir = $(prefix)/dx/java/htmlpages
++javadxdir = $(datadir)/dx/java/htmlpages
+ javadx_DATA = dx.jar 
+-javasrvdir = $(prefix)/dx/java/server/class
++javasrvdir = $(datadir)/dx/java/server/class
+ javasrv_DATA = server.jar 
+ EXTRA_DIST = $(DX_SRCS) DXServer.java makeall.java makewrl.java exports.awk
+-javalibdir = $(prefix)/dx/java/server/lib_@ARCH@
++javalibdir = $(datadir)/dx/java/server/lib
+ 
+ javalib_DATA = @ANYDX@
+ # EXTRA_PROGRAMS = libAnyDX.so AnyDX.dll
+diff -urN dx-4.2.0.orig/src/uipp/java/server/Makefile.am dx-4.2.0/src/uipp/java/server/Makefile.am
+--- dx-4.2.0.orig/src/uipp/java/server/Makefile.am	Thu May 31 16:50:15 2001
++++ dx-4.2.0/src/uipp/java/server/Makefile.am	Tue Jul 16 22:19:38 2002
+@@ -1,6 +1,6 @@
+-srvbindir = $(prefix)/dx/java/server/bin
+-srvoutputdir = $(prefix)/dx/java/output
+-userhtmldir = $(prefix)/dx/java/user
++srvbindir = $(datadir)/dx/java/server/bin
++srvoutputdir = $(datadir)/dx/java/output
++userhtmldir = $(datadir)/dx/java/user
+ # the server script (in srvbindir) will actually cd and run from the class subdir so that java will find the classes
+ # the server will expect to find a file dxserver.paths there to tell the exec where to find .net files
+ srvrundir = $(srvbindir)/../class
+diff -urN dx-4.2.0.orig/src/uipp/java/server/macros/Makefile.am dx-4.2.0/src/uipp/java/server/macros/Makefile.am
+--- dx-4.2.0.orig/src/uipp/java/server/macros/Makefile.am	Fri Jul  9 21:25:13 1999
++++ dx-4.2.0/src/uipp/java/server/macros/Makefile.am	Tue Jul 16 22:19:38 2002
+@@ -1,6 +1,6 @@
+ ##  Process this file with automake to produce Makefile.in
+ 
+-serverdatadir = $(prefix)/dx/java/server/dxmacros
++serverdatadir = $(datadir)/dx/java/server/dxmacros
+ 
+ serverdata_DATA = $(MACRO_FILES)
+ 
+diff -urN dx-4.2.0.orig/src/uipp/mb/Makefile.am dx-4.2.0/src/uipp/mb/Makefile.am
+--- dx-4.2.0.orig/src/uipp/mb/Makefile.am	Wed Apr  3 02:56:22 2002
++++ dx-4.2.0/src/uipp/mb/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -2,7 +2,7 @@
  
- INCLUDES = -I../../../include -I../base -I../widgets -D@ARCH@
+ INCLUDES = -I${top_srcdir}/include -I${srcdir}/../base -I${srcdir}/../widgets -D@ARCH@
  
 -dxbindir = $(prefix)/dx/bin_@ARCH@
 +dxbindir = $(prefix)/bin
  
  dxbin_PROGRAMS = builder
  
-diff -urN dx-4.1.0/src/uipp/prompter/Makefile.am dx-4.1.0-DESTDIR/src/uipp/prompter/Makefile.am
---- dx-4.1.0/src/uipp/prompter/Makefile.am	Mon May  3 16:08:59 1999
-+++ dx-4.1.0-DESTDIR/src/uipp/prompter/Makefile.am	Sun Aug 27 15:44:53 2000
+diff -urN dx-4.2.0.orig/src/uipp/prompter/Makefile.am dx-4.2.0/src/uipp/prompter/Makefile.am
+--- dx-4.2.0.orig/src/uipp/prompter/Makefile.am	Wed Apr  3 02:56:22 2002
++++ dx-4.2.0/src/uipp/prompter/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -2,7 +2,7 @@
  
- INCLUDES =  -I../base -I../../../include -D@ARCH@
+ INCLUDES =  -I${srcdir}/../base -I${top_srcdir}/include -D@ARCH@
  
 -dxbindir = $(prefix)/dx/bin_@ARCH@
 +dxbindir = $(prefix)/bin
  
  dxbin_PROGRAMS = prompter
  
-diff -urN dx-4.1.0/src/uipp/startup/Makefile.am dx-4.1.0-DESTDIR/src/uipp/startup/Makefile.am
---- dx-4.1.0/src/uipp/startup/Makefile.am	Mon May  3 16:08:59 1999
-+++ dx-4.1.0-DESTDIR/src/uipp/startup/Makefile.am	Sun Aug 27 15:45:12 2000
+diff -urN dx-4.2.0.orig/src/uipp/startup/Makefile.am dx-4.2.0/src/uipp/startup/Makefile.am
+--- dx-4.2.0.orig/src/uipp/startup/Makefile.am	Wed Apr  3 02:56:24 2002
++++ dx-4.2.0/src/uipp/startup/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -2,7 +2,7 @@
  
- INCLUDES =  -I../../../include -I../base -D@ARCH@
+ INCLUDES =  -I${top_srcdir}/include -I${srcdir}/../base -D@ARCH@
  
 -dxbindir = $(prefix)/dx/bin_@ARCH@
 +dxbindir = $(prefix)/bin
  
  dxbin_PROGRAMS = startupui
  
-diff -urN dx-4.1.0/src/uipp/tutor/Makefile.am dx-4.1.0-DESTDIR/src/uipp/tutor/Makefile.am
---- dx-4.1.0/src/uipp/tutor/Makefile.am	Mon May  3 16:09:00 1999
-+++ dx-4.1.0-DESTDIR/src/uipp/tutor/Makefile.am	Sun Aug 27 15:45:36 2000
+diff -urN dx-4.2.0.orig/src/uipp/tutor/Makefile.am dx-4.2.0/src/uipp/tutor/Makefile.am
+--- dx-4.2.0.orig/src/uipp/tutor/Makefile.am	Wed Apr  3 02:56:23 2002
++++ dx-4.2.0/src/uipp/tutor/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -2,7 +2,7 @@
  
- INCLUDES = -I../../../include -I../base -D@ARCH@
+ INCLUDES = -I${top_srcdir}/include -I${srcdir}/../base -D@ARCH@
  
 -dxbindir = $(prefix)/dx/bin_@ARCH@
 +dxbindir = $(prefix)/bin
  
  dxbin_PROGRAMS = tutor
  
-diff -urN dx-4.1.0/src/uipp/ui/Makefile.am dx-4.1.0-DESTDIR/src/uipp/ui/Makefile.am
---- dx-4.1.0/src/uipp/ui/Makefile.am	Mon Jun  7 21:19:27 1999
-+++ dx-4.1.0-DESTDIR/src/uipp/ui/Makefile.am	Sun Aug 27 15:02:30 2000
+diff -urN dx-4.2.0.orig/src/uipp/ui/Makefile.am dx-4.2.0/src/uipp/ui/Makefile.am
+--- dx-4.2.0.orig/src/uipp/ui/Makefile.am	Thu Apr 12 16:29:02 2001
++++ dx-4.2.0/src/uipp/ui/Makefile.am	Tue Jul 16 22:19:38 2002
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -234,4 +296,4 @@ diff -urN dx-4.1.0/src/uipp/ui/Makefile.am dx-4.1.0-DESTDIR/src/uipp/ui/Makefile
 +uidatadir = $(datadir)/dx/ui
  
  DATA1 = \
- 	icon50.dat logo.dat ui.mdf Basic2D.cfg Basic2D.net \
+ 	icon50.dat icon50.xpm logo.dat logo.xpm ui.mdf Basic2D.cfg Basic2D.net \
