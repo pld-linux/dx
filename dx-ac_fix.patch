@@ -1,0 +1,24 @@
+--- dx-4.2.0/configure.in~	Sat May 18 00:08:46 2002
++++ dx-4.2.0/configure.in	Sun Nov 10 23:20:40 2002
+@@ -1177,7 +1177,6 @@
+ 	src/uipp/startup/Makefile \
+ 	src/uipp/tutor/Makefile \
+ 	src/uipp/ui/Makefile \
+-	src/uipp/ui/Makefile \
+ 	src/uipp/widgets/Makefile 
+ 	windows/Makefile
+ )
+--- dx-4.2.0/acinclude.m4~	Mon May 20 17:45:07 2002
++++ dx-4.2.0/acinclude.m4	Sun Nov 10 23:22:14 2002
+@@ -1090,9 +1090,9 @@
+ dnl
+ dnl DX_FIND_NETSCAPE(PATH [, ACTION-IF-TRUE [, ACTION-IF-FALSE ]])
+ dnl  -------------------------------------------------------------
+-AC_DEFUN(DX_FIND_NETSCAPE, 
++AC_DEFUN(DX_FIND_NETSCAPE, [
+ AC_MSG_CHECKING([for netscape jar files])
+-[AC_CACHE_VAL([ac_cv_class_netscape],
++AC_CACHE_VAL([ac_cv_class_netscape],
+ [
+ if test -r $1; then
+   ac_cv_class_netscape=$1
