@@ -6,7 +6,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx
 Version:	4.3.2
-Release:	2
+Release:	3
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -14,6 +14,7 @@ Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
 # Source1-md5:	940eece74fc2bf001a8017f9df18daac
 Patch0:		%{name}-DESTDIR.patch
+Patch1:		%{name}-nolibs.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel
 BuildRequires:	OpenGL-devel-base
@@ -27,7 +28,7 @@ BuildRequires:	libtool
 BuildRequires:	libtiff-devel
 BuildRequires:	motif-devel
 BuildRequires:	netcdf-devel
-Requires:	%{name}-libs = %{version}
+Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		specflags_ia32	-fomit-frame-pointer
@@ -61,7 +62,7 @@ Biblioteki wspó³dzielone OpenDX.
 Summary:	OpenDX development files
 Summary(pl):	Pliki nag³ówkowe OpenDX
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{version}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description devel
 OpenDX development files.
@@ -73,7 +74,7 @@ Pliki nag³ówkowe OpenDX oraz inne pliki, potrzebne do budowania.
 Summary:	OpenDX static libraries
 Summary(pl):	Biblioteki statyczne OpenDX
 Group:		Development/Libraries
-Requires:	%{name}-devel = %{version}
+Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 OpenDX static libraries.
@@ -95,9 +96,9 @@ Podrêczna pomoc oraz dokumentacja html dla OpenDX.
 %prep
 %setup  -q
 #%patch0 -p1
+%patch1 -p1
 
 %build
-rm -f missing aclocal.m4
 %{__libtoolize}
 %{__aclocal}
 %{__autoheader}
@@ -136,6 +137,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
+%doc doc/README*
 %attr(755,root,root) %{_bindir}/*
 %dir %{_datadir}/dx
 %attr(755,root,root) %{_datadir}/dx/bin
@@ -144,7 +146,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dx/lib
 %{_datadir}/dx/lib_linux
 %{_datadir}/dx/ui
-%doc doc/README*
 %{_mandir}/manl/*
 
 %files libs
