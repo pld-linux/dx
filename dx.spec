@@ -40,7 +40,7 @@ daje u¿ytkownikom du¿± elastyczno¶æ w tworzeniu wizualizacji.
 
 %build
 rm -f missing
-autoheader
+%{__autoheader}
 %{__aclocal}
 %{__autoconf}
 %{__automake} -a
