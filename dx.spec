@@ -1,6 +1,7 @@
 #
 # TODO: - add samples
 #	- make static subpackage
+#	- add desktop file
 #
 Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
@@ -108,19 +109,15 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir}} \
-	$RPM_BUILD_ROOT%{_docdir}/%{name}-doc-%{version}
+install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir}}
 
 mv $RPM_BUILD_ROOT%{_datadir}/bin/dx $RPM_BUILD_ROOT%{_bindir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/man/manl $RPM_BUILD_ROOT%{_mandir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/include/* $RPM_BUILD_ROOT%{_includedir}
-mv $RPM_BUILD_ROOT%{_datadir}/dx/h* $RPM_BUILD_ROOT%{_docdir}/%{name}-doc-%{version}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux $RPM_BUILD_ROOT%{_libdir}/dx
 mv $RPM_BUILD_ROOT%{_datadir}/dx/bin_linux $RPM_BUILD_ROOT%{_libdir}/dx
 ln -s %{_libdir}/dx $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux
 ln -s %{_libdir}/dx/bin_linux $RPM_BUILD_ROOT%{_datadir}/dx
-ln -s %{_docdir}/%{name}-doc-%{version}/help $RPM_BUILD_ROOT%{_datadir}/dx/help
-ln -s %{_docdir}/%{name}-doc-%{version}/html $RPM_BUILD_ROOT%{_datadir}/dx/html
 rm -rf $RPM_BUILD_ROOT%{_datadir}/{bin,dx/{bin/dx,man,include,doc}}
 
 %clean
@@ -155,5 +152,4 @@ rm -rf $RPM_BUILD_ROOT
 
 %files doc
 %defattr(644,root,root,755)
-%{_docdir}/%{name}-doc-%{version}
 %{_datadir}/dx/h*
