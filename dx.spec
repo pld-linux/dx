@@ -8,7 +8,7 @@ Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
 Patch0:		%{name}-DESTDIR.patch
-#Patch1:		%{name}-acfix.patch
+Patch1:		%{name}-ac_fix.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel
 BuildRequires:	autoconf
@@ -36,15 +36,15 @@ daje u¿ytkownikom du¿± elastyczno¶æ w tworzeniu wizualizacji.
 %prep
 %setup  -q
 %patch0 -p1
-#%patch1 -p1
+%patch1 -p1
 
 %build
-rm -f missing
-%{__autoheader}
+rm -f missing aclocal.m4
 %{__aclocal}
+%{__autoheader}
 %{__autoconf}
-%{__automake} -a
-%configure2_13 \
+%{__automake}
+%configure \
 	--prefix=%{_prefix} \
 	--datadir=%{_datadir} \
 	--mandir=%{_mandir} \
