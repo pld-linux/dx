@@ -6,7 +6,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx
 Version:	4.3.2
-Release:	4
+Release:	5
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -150,11 +150,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/*
-%exclude %{_libdir}/dx/*.mak
-%exclude %{_libdir}/dx/*.la
-%exclude %{_libdir}/dx/*.so
-%exclude %{_libdir}/dx/*.a
+%dir %{_libdir}/dx
+%attr(755,root,root) %{_libdir}/dx/bin_linux
+%attr(755,root,root) %{_libdir}/dx/lib*.so.*
 
 %files devel
 %defattr(644,root,root,755)
