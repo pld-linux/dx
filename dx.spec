@@ -1,9 +1,11 @@
-Summary:	Excelent tool to making visualization of data.	
-Summary(pl):	Doskonale narzedzie do vizualizacji danych
+Summary:	Excelent tool to making visualization of data
+Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx	
 Version:	4.1.3
 Release:	1
 Group:		Applications
+Group(de):	Applikationen
+Group(pl):	Aplikacje
 License:	IPL
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
@@ -25,6 +27,11 @@ sophisticated data model provides users with great flexibility in
 creating visualizations.
 
 %description -l pl
+OpenDX jest w pe³ni funkcjonalnym, o unikalnych mo¿liwo¶ciach,
+pakietem do wizualizacji danych naukowych, in¿ynierskich i
+analitycznych. Zosta³ zaprojektowany w sposób otwarty, w oparciu o
+standardowe ¶rodowiska interfejstów. Jego przemy¶lany model danych
+daje u¿ytkownikom du¿± elastyczno¶æ w tworzeniu wizualizacji.
 
 %prep
 %setup  -q
@@ -32,7 +39,7 @@ creating visualizations.
 %patch1 -p1
 
 %build
-rm missing
+rm -f missing
 #autoheader
 #aclocal
 #autoconf
@@ -51,9 +58,7 @@ rm -rf $RPM_BUILD_ROOT
 #install -d $RPM_BUILD_ROOT%{_includedir}/%{name}
 #install -d $RPM_BUILD_ROOT%{_libdir}/%{name}
 
-
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
-
 
 gzip -9nf README ChangeLog 
 
@@ -64,10 +69,10 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/*
 %{_includedir}/*
-%{_includedir}/dx/*
 %{_libdir}/*
 %doc *.gz
-%{_datadir}/dx/fonts/*
-%{_datadir}/dx/bin/*
-%{_datadir}/dx/help/*
-%{_datadir}/dx/ui/*
+%dir %{_datadir}/dx
+%{_datadir}/dx/fonts
+%{_datadir}/dx/bin
+%{_datadir}/dx/help
+%{_datadir}/dx/ui
