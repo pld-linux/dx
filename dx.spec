@@ -3,22 +3,13 @@ Summary(pl):	Doskonale narzedzie do vizualizacji danych
 Name:		dx	
 Version:	4.1.0
 Release:	1
-Group:		-
-######		Unknown group!
-Group(de):	-
-Group(fr):	-
-Group(pl):	-
-Group(tr):	-
+Group:		Applications
 Copyright:	IPL
-Vendor:		PLD
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-4.0.8.tar.gz
 Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-acfix.patch
 URL:		http://www.opendx.org	
-#BuildPrereq:	
-#Requires:	
-#Prereq:	
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define         _prefix         /usr/X11R6
@@ -60,14 +51,6 @@ install -d $RPM_BUILD_ROOT%{_libdir}/%{name}
 
 gzip -9nf $RPM_BUILD_ROOT%{_mandir}/man*/* \
 	README ChangeLog 
-
-%pre
-
-%preun
-
-%post
-
-%postun
 
 %clean
 rm -rf $RPM_BUILD_ROOT
