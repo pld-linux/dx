@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=OpenDX
+Comment=Open Data Explorer
+Icon=dx
+Exec=dx
+Terminal=false
+Type=Application
+Categories=Utility;Engineering;
+# vi: encoding=utf-8
