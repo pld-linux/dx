@@ -1,6 +1,5 @@
 #
 # TODO: - add samples
-#	- add desktop file
 #
 Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
@@ -13,8 +12,10 @@ Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 # Source0-md5:	201afdd86a5ddcfda0dc60fc7b6d3fea
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
 # Source1-md5:	940eece74fc2bf001a8017f9df18daac
+Source2:	%{name}.desktop
 Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-nolibs.patch
+Patch2:		dxsamples-DESTDIR.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel
 BuildRequires:	OpenGL-devel-base
@@ -121,8 +122,10 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir}}
+install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir},%{_desktopdir},%{_pixmapsdir}}
 
+install %{SOURCE2} $RPM_BUILD_ROOT%{_desktopdir}
+install src/uipp/ui/icon50.xpm $RPM_BUILD_ROOT%{_pixmapsdir}/dx.xpm
 mv $RPM_BUILD_ROOT%{_datadir}/bin/dx $RPM_BUILD_ROOT%{_bindir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/man/manl $RPM_BUILD_ROOT%{_mandir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/include/* $RPM_BUILD_ROOT%{_includedir}
@@ -147,6 +150,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dx/lib_linux
 %{_datadir}/dx/ui
 %{_mandir}/manl/*
+%{_desktopdir}/*
+%{_pixmapsdir}/*
 
 %files libs
 %defattr(644,root,root,755)
