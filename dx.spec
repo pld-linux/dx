@@ -5,7 +5,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx
 Version:	4.3.2
-Release:	7
+Release:	8
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -17,7 +17,7 @@ Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-nolibs.patch
 Patch2:		dxsamples-DESTDIR.patch
 URL:		http://www.opendx.org/
-BuildRequires:	ImageMagick-devel
+BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-devel-base
 BuildRequires:	autoconf >= 2.57
 BuildRequires:	automake
