@@ -137,9 +137,7 @@ cd ..
 
 %{__make}
 
-cd %{name}samples-%{version}
-%{__make}
-cd ..
+%{__make} -C %{name}samples-%{version}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -147,10 +145,8 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-cd %{name}samples-%{version}
-%{__make} install \
+%{__make} -C %{name}samples-%{version} install \
 	DESTDIR=$RPM_BUILD_ROOT
-cd ..
 
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir},%{_desktopdir},%{_pixmapsdir}}
 install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
