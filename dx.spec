@@ -125,19 +125,21 @@ Przyk³ady dla OpenDX.
 	--enable-new-keylayout \
 	--without-javadx
 
-( cd %{name}samples-%{version} && \
-  %{__aclocal} && \
-  %{__autoheader} && \
-  %{__autoconf} && \
-  %{__automake} && \
-  %configure \
+cd %{name}samples-%{version}
+%{__aclocal}
+%{__autoheader}
+%{__autoconf}
+%{__automake}
+%configure \
 	--prefix=%{_examplesdir} \
-	--without-javadx \
-)
+	--without-javadx
+cd ..
 
 %{__make}
 
-( cd %{name}samples-%{version} && %{__make} )
+cd %{name}samples-%{version}
+%{__make}
+cd ..
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -145,7 +147,10 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-( cd %{name}samples-%{version} && %{__make} install DESTDIR=$RPM_BUILD_ROOT )
+cd %{name}samples-%{version}
+%{__make} install \
+	DESTDIR=$RPM_BUILD_ROOT
+cd ..
 
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir},%{_desktopdir},%{_pixmapsdir}}
 install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
