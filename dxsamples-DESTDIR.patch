@@ -265,3 +265,37 @@ diff -urN dxsamples-4.3.2.orig/stereo/src/Makefile.am dxsamples-4.3.2/stereo/src
  
  uninstall-local:
  	rm $(datadir)/makefile
+--- dxsamples-4.3.2/java/Makefile.am.orig	2006-02-04 11:59:32.000000000 +0100
++++ dxsamples-4.3.2/java/Makefile.am	2006-02-04 11:59:37.000000000 +0100
+@@ -1,6 +1,6 @@
+ ## Process this file with automake to produce Makefile.in
+  
+-javasampdir = $(prefix)/dx/java/htmlpages
++javasampdir = $(prefix)/dx/samples/java/htmlpages
+ javasamp_DATA = $(WEB_FILES)
+ EXTRA_DIST = $(WEB_FILES)
+  
+--- dxsamples-4.3.2/java/nets/Makefile.am.orig	2006-02-04 12:34:45.000000000 +0100
++++ dxsamples-4.3.2/java/nets/Makefile.am	2006-02-04 12:34:55.000000000 +0100
+@@ -1,4 +1,4 @@
+-javanetsdir = $(prefix)/dx/java/server/nets
++javanetsdir = $(prefix)/dx/samples/java/server/nets
+ javanets_DATA = $(NET_FILES)
+ EXTRA_DIST = $(NET_FILES)
+ NET_FILES = AutoInsurance.cfg AutoInsurance.net \
+--- dxsamples-4.3.2/java/userdata/Makefile.am.orig	2006-02-04 12:33:39.000000000 +0100
++++ dxsamples-4.3.2/java/userdata/Makefile.am	2006-02-04 12:33:56.000000000 +0100
+@@ -1,4 +1,4 @@
+-javadatadir = $(prefix)/dx/java/server/userdata
++javadatadir = $(prefix)/dx/samples/java/server/userdata
+ DATA_FILES = AutoInsurance.txt CCAll.dx Makefile.am Norm.dx apt.txt arf.txt asr.txt enhigh.cxn enhigh.txt enlow.cxn enlow.txt ibm94.txt ibm95.txt ibm96.txt mf1.txt npvcall.cm npvcall2.cm option.cm
+ javadata_DATA = $(DATA_FILES)
+ EXTRA_DIST = $(DATA_FILES)
+--- dxsamples-4.3.2/java/usermacros/Makefile.am.orig	2006-02-04 12:39:29.000000000 +0100
++++ dxsamples-4.3.2/java/usermacros/Makefile.am	2006-02-04 12:39:35.000000000 +0100
+@@ -1,4 +1,4 @@
+-javamacrodir = $(prefix)/dx/java/server/usermacros
++javamacrodir = $(prefix)/dx/samples/java/server/usermacros
+ 
+ MACRO_FILES = ClassifyMacro.net Legend2Macro.net MOSFromLongLat.net \
+ 	bschols.net kmeansmacro.net logn.net optsurf.net \

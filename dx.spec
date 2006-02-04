@@ -1,11 +1,8 @@
-#
-# TODO: - add samples
-#
 Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx
 Version:	4.3.2
-Release:	8
+Release:	9
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -16,6 +13,7 @@ Source2:	%{name}.desktop
 Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-nolibs.patch
 Patch2:		dxsamples-DESTDIR.patch
+Patch3:		dxsamples-unused_bin.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-devel-base
@@ -94,10 +92,23 @@ Online help and html documentation for OpenDX.
 %description doc -l pl
 Podrêczna pomoc oraz dokumentacja html dla OpenDX.
 
+%package examples
+Summary:	OpenDX Examples
+Summary(pl):	Przyk³ady dla OpenDX
+Group:		Documentation
+
+%description examples
+Examples for OpenDX.
+
+%description examples -l pl
+Przyk³ady dla OpenDX.
+
 %prep
-%setup  -q
+%setup  -q -a 1
 #%patch0 -p1
 %patch1 -p1
+%patch2 -p0
+%patch3 -p1
 
 %build
 %{__libtoolize}
@@ -114,7 +125,19 @@ Podrêczna pomoc oraz dokumentacja html dla OpenDX.
 	--enable-new-keylayout \
 	--without-javadx
 
+( cd %{name}samples-%{version} && \
+  %{__aclocal} && \
+  %{__autoheader} && \
+  %{__autoconf} && \
+  %{__automake} && \
+  %configure \
+	--prefix=%{_examplesdir} \
+	--without-javadx \
+)
+
 %{__make}
+
+( cd %{name}samples-%{version} && %{__make} )
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -122,7 +145,10 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
+( cd %{name}samples-%{version} && %{__make} install DESTDIR=$RPM_BUILD_ROOT )
+
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir},%{_desktopdir},%{_pixmapsdir}}
+install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
 install %{SOURCE2} $RPM_BUILD_ROOT%{_desktopdir}
 install src/uipp/ui/icon50.xpm $RPM_BUILD_ROOT%{_pixmapsdir}/dx.xpm
@@ -131,6 +157,7 @@ mv $RPM_BUILD_ROOT%{_datadir}/dx/man/manl $RPM_BUILD_ROOT%{_mandir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/include/* $RPM_BUILD_ROOT%{_includedir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux $RPM_BUILD_ROOT%{_libdir}/dx
 mv $RPM_BUILD_ROOT%{_datadir}/dx/bin_linux $RPM_BUILD_ROOT%{_libdir}/dx
+mv $RPM_BUILD_ROOT%{_examplesdir}/dx/samples/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 ln -s %{_libdir}/dx $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux
 ln -s %{_libdir}/dx/bin_linux $RPM_BUILD_ROOT%{_datadir}/dx
 rm -rf $RPM_BUILD_ROOT%{_datadir}/{bin,dx/{bin/dx,man,include,doc}}
@@ -173,3 +200,7 @@ rm -rf $RPM_BUILD_ROOT
 %files doc
 %defattr(644,root,root,755)
 %{_datadir}/dx/h*
+
+%files examples
+%defattr(644,root,root,755)
+%{_examplesdir}/%{name}-%{version}
