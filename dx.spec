@@ -1,14 +1,14 @@
 Summary:	Excellent tool for making visualization of data
 Summary(pl):	Doskona³e narzêdzie do wizualizacji danych
 Name:		dx
-Version:	4.3.2
+Version:	4.4.0
 Release:	9
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
-# Source0-md5:	201afdd86a5ddcfda0dc60fc7b6d3fea
+# Source0-md5:	8fe6a09faea4aa713a1540f51371b719
 Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
-# Source1-md5:	940eece74fc2bf001a8017f9df18daac
+# Source1-md5:	e8f43722ca0a66282608bded7c0e4f93
 Source2:	%{name}.desktop
 Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-nolibs.patch

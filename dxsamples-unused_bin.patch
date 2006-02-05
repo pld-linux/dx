@@ -1,5 +1,5 @@
---- dx-4.3.2/dxsamples-4.3.2/data/Makefile.am.orig	2006-02-04 11:39:22.000000000 +0100
-+++ dx-4.3.2/dxsamples-4.3.2/data/Makefile.am	2006-02-04 11:40:20.000000000 +0100
+--- dx-4.4.0/dxsamples-4.4.0/data/Makefile.am.orig	2006-02-04 11:39:22.000000000 +0100
++++ dx-4.4.0/dxsamples-4.4.0/data/Makefile.am	2006-02-04 11:40:20.000000000 +0100
 @@ -3,5 +3,5 @@
  
  datadir = $(prefix)/dx/samples/data

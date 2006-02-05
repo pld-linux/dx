@@ -1,30 +1,6 @@
-diff -urN dxsamples-4.3.2.orig/callmodule/Makefile.am dxsamples-4.3.2/callmodule/Makefile.am
---- dxsamples-4.3.2.orig/callmodule/Makefile.am	2003-06-19 07:02:52.000000000 +0200
-+++ dxsamples-4.3.2/callmodule/Makefile.am	2005-05-06 15:13:22.000000000 +0200
-@@ -7,7 +7,7 @@
- EXTRA_DIST = $(data_DATA)
- 
- install-data-hook:
--	cp localmk $(datadir)/makefile
-+	cp localmk $(DESTDIR)/$(datadir)/makefile
- 
- uninstall-local:
- 	rm $(datadir)/makefile
-diff -urN dxsamples-4.3.2.orig/program_guide/Makefile.am dxsamples-4.3.2/program_guide/Makefile.am
---- dxsamples-4.3.2.orig/program_guide/Makefile.am	2003-06-19 07:09:12.000000000 +0200
-+++ dxsamples-4.3.2/program_guide/Makefile.am	2005-05-06 15:13:26.000000000 +0200
-@@ -19,7 +19,7 @@
- EXTRA_DIST = $(data_DATA) 
- 
- install-data-hook:
--	cp localmk $(datadir)/makefile
-+	cp localmk $(DESTDIR)/$(datadir)/makefile
- 
- uninstall-local:
- 	rm $(datadir)/makefile
-diff -urN dxsamples-4.3.2.orig/programs/2D_DATA/Makefile.am dxsamples-4.3.2/programs/2D_DATA/Makefile.am
---- dxsamples-4.3.2.orig/programs/2D_DATA/Makefile.am	2002-04-30 20:53:26.000000000 +0200
-+++ dxsamples-4.3.2/programs/2D_DATA/Makefile.am	2005-05-06 15:12:07.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/2D_DATA/Makefile.am dxsamples-4.4.0/programs/2D_DATA/Makefile.am
+--- dxsamples-4.4.0.orig/programs/2D_DATA/Makefile.am	2002-04-30 20:53:26.000000000 +0200
++++ dxsamples-4.4.0/programs/2D_DATA/Makefile.am	2005-05-06 15:12:07.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -33,9 +9,9 @@ diff -urN dxsamples-4.3.2.orig/programs/2D_DATA/Makefile.am dxsamples-4.3.2/prog
  
  LINKLIST = \
           AlternateVisualizations.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/3D_DATA/Makefile.am dxsamples-4.3.2/programs/3D_DATA/Makefile.am
---- dxsamples-4.3.2.orig/programs/3D_DATA/Makefile.am	2002-04-30 20:53:26.000000000 +0200
-+++ dxsamples-4.3.2/programs/3D_DATA/Makefile.am	2005-05-06 15:12:00.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/3D_DATA/Makefile.am dxsamples-4.4.0/programs/3D_DATA/Makefile.am
+--- dxsamples-4.4.0.orig/programs/3D_DATA/Makefile.am	2002-04-30 20:53:26.000000000 +0200
++++ dxsamples-4.4.0/programs/3D_DATA/Makefile.am	2005-05-06 15:12:00.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -44,9 +20,9 @@ diff -urN dxsamples-4.3.2.orig/programs/3D_DATA/Makefile.am dxsamples-4.3.2/prog
  
  LINKLIST = \
           AnnotationGlyphs.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/ANNOTATION/Makefile.am dxsamples-4.3.2/programs/ANNOTATION/Makefile.am
---- dxsamples-4.3.2.orig/programs/ANNOTATION/Makefile.am	2002-04-30 20:53:25.000000000 +0200
-+++ dxsamples-4.3.2/programs/ANNOTATION/Makefile.am	2005-05-06 15:11:35.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/ANNOTATION/Makefile.am dxsamples-4.4.0/programs/ANNOTATION/Makefile.am
+--- dxsamples-4.4.0.orig/programs/ANNOTATION/Makefile.am	2002-04-30 20:53:25.000000000 +0200
++++ dxsamples-4.4.0/programs/ANNOTATION/Makefile.am	2005-05-06 15:11:35.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -55,9 +31,9 @@ diff -urN dxsamples-4.3.2.orig/programs/ANNOTATION/Makefile.am dxsamples-4.3.2/p
  
  LINKLIST = \
           AnnotationGlyphs.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/CATEGORICAL/Makefile.am dxsamples-4.3.2/programs/CATEGORICAL/Makefile.am
---- dxsamples-4.3.2.orig/programs/CATEGORICAL/Makefile.am	2002-04-30 20:53:24.000000000 +0200
-+++ dxsamples-4.3.2/programs/CATEGORICAL/Makefile.am	2005-05-06 15:11:46.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/CATEGORICAL/Makefile.am dxsamples-4.4.0/programs/CATEGORICAL/Makefile.am
+--- dxsamples-4.4.0.orig/programs/CATEGORICAL/Makefile.am	2002-04-30 20:53:24.000000000 +0200
++++ dxsamples-4.4.0/programs/CATEGORICAL/Makefile.am	2005-05-06 15:11:46.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -66,9 +42,9 @@ diff -urN dxsamples-4.3.2.orig/programs/CATEGORICAL/Makefile.am dxsamples-4.3.2/
  
  LINKLIST = \
           Categorical.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/COLORMAP_EDITOR/Makefile.am dxsamples-4.3.2/programs/COLORMAP_EDITOR/Makefile.am
---- dxsamples-4.3.2.orig/programs/COLORMAP_EDITOR/Makefile.am	2002-04-30 20:53:23.000000000 +0200
-+++ dxsamples-4.3.2/programs/COLORMAP_EDITOR/Makefile.am	2005-05-06 15:12:04.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/COLORMAP_EDITOR/Makefile.am dxsamples-4.4.0/programs/COLORMAP_EDITOR/Makefile.am
+--- dxsamples-4.4.0.orig/programs/COLORMAP_EDITOR/Makefile.am	2002-04-30 20:53:23.000000000 +0200
++++ dxsamples-4.4.0/programs/COLORMAP_EDITOR/Makefile.am	2005-05-06 15:12:04.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -77,9 +53,9 @@ diff -urN dxsamples-4.3.2.orig/programs/COLORMAP_EDITOR/Makefile.am dxsamples-4.
  
  LINKLIST = \
           DataDrivenInteractors.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/COMPUTE/Makefile.am dxsamples-4.3.2/programs/COMPUTE/Makefile.am
---- dxsamples-4.3.2.orig/programs/COMPUTE/Makefile.am	2002-04-30 20:53:23.000000000 +0200
-+++ dxsamples-4.3.2/programs/COMPUTE/Makefile.am	2005-05-06 15:11:27.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/COMPUTE/Makefile.am dxsamples-4.4.0/programs/COMPUTE/Makefile.am
+--- dxsamples-4.4.0.orig/programs/COMPUTE/Makefile.am	2002-04-30 20:53:23.000000000 +0200
++++ dxsamples-4.4.0/programs/COMPUTE/Makefile.am	2005-05-06 15:11:27.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -88,9 +64,9 @@ diff -urN dxsamples-4.3.2.orig/programs/COMPUTE/Makefile.am dxsamples-4.3.2/prog
  
  LINKLIST = \
           Bounce.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/DATA_DRIVEN_INTERACTORS/Makefile.am dxsamples-4.3.2/programs/DATA_DRIVEN_INTERACTORS/Makefile.am
---- dxsamples-4.3.2.orig/programs/DATA_DRIVEN_INTERACTORS/Makefile.am	2002-04-30 20:53:22.000000000 +0200
-+++ dxsamples-4.3.2/programs/DATA_DRIVEN_INTERACTORS/Makefile.am	2005-05-06 15:11:39.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/DATA_DRIVEN_INTERACTORS/Makefile.am dxsamples-4.4.0/programs/DATA_DRIVEN_INTERACTORS/Makefile.am
+--- dxsamples-4.4.0.orig/programs/DATA_DRIVEN_INTERACTORS/Makefile.am	2002-04-30 20:53:22.000000000 +0200
++++ dxsamples-4.4.0/programs/DATA_DRIVEN_INTERACTORS/Makefile.am	2005-05-06 15:11:39.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -99,9 +75,9 @@ diff -urN dxsamples-4.3.2.orig/programs/DATA_DRIVEN_INTERACTORS/Makefile.am dxsa
  
  LINKLIST = \
           DataDrivenInteractors.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/DEBUGGING/Makefile.am dxsamples-4.3.2/programs/DEBUGGING/Makefile.am
---- dxsamples-4.3.2.orig/programs/DEBUGGING/Makefile.am	2002-04-30 20:53:21.000000000 +0200
-+++ dxsamples-4.3.2/programs/DEBUGGING/Makefile.am	2005-05-06 15:11:57.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/DEBUGGING/Makefile.am dxsamples-4.4.0/programs/DEBUGGING/Makefile.am
+--- dxsamples-4.4.0.orig/programs/DEBUGGING/Makefile.am	2002-04-30 20:53:21.000000000 +0200
++++ dxsamples-4.4.0/programs/DEBUGGING/Makefile.am	2005-05-06 15:11:57.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -110,9 +86,9 @@ diff -urN dxsamples-4.3.2.orig/programs/DEBUGGING/Makefile.am dxsamples-4.3.2/pr
  
  LINKLIST = \
           Verify.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/DISTRIBUTED_PROCESSING/Makefile.am dxsamples-4.3.2/programs/DISTRIBUTED_PROCESSING/Makefile.am
---- dxsamples-4.3.2.orig/programs/DISTRIBUTED_PROCESSING/Makefile.am	2002-04-30 20:53:20.000000000 +0200
-+++ dxsamples-4.3.2/programs/DISTRIBUTED_PROCESSING/Makefile.am	2005-05-06 15:12:20.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/DISTRIBUTED_PROCESSING/Makefile.am dxsamples-4.4.0/programs/DISTRIBUTED_PROCESSING/Makefile.am
+--- dxsamples-4.4.0.orig/programs/DISTRIBUTED_PROCESSING/Makefile.am	2002-04-30 20:53:20.000000000 +0200
++++ dxsamples-4.4.0/programs/DISTRIBUTED_PROCESSING/Makefile.am	2005-05-06 15:12:20.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -121,9 +97,9 @@ diff -urN dxsamples-4.3.2.orig/programs/DISTRIBUTED_PROCESSING/Makefile.am dxsam
  
  LINKLIST = \
           Distributed.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/IMAGE_PROCESSING/Makefile.am dxsamples-4.3.2/programs/IMAGE_PROCESSING/Makefile.am
---- dxsamples-4.3.2.orig/programs/IMAGE_PROCESSING/Makefile.am	2002-04-30 20:53:20.000000000 +0200
-+++ dxsamples-4.3.2/programs/IMAGE_PROCESSING/Makefile.am	2005-05-06 15:12:10.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/IMAGE_PROCESSING/Makefile.am dxsamples-4.4.0/programs/IMAGE_PROCESSING/Makefile.am
+--- dxsamples-4.4.0.orig/programs/IMAGE_PROCESSING/Makefile.am	2002-04-30 20:53:20.000000000 +0200
++++ dxsamples-4.4.0/programs/IMAGE_PROCESSING/Makefile.am	2005-05-06 15:12:10.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -132,9 +108,9 @@ diff -urN dxsamples-4.3.2.orig/programs/IMAGE_PROCESSING/Makefile.am dxsamples-4
  
  LINKLIST = \
           FFT.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/IMPORTING/Makefile.am dxsamples-4.3.2/programs/IMPORTING/Makefile.am
---- dxsamples-4.3.2.orig/programs/IMPORTING/Makefile.am	2002-04-30 20:53:19.000000000 +0200
-+++ dxsamples-4.3.2/programs/IMPORTING/Makefile.am	2005-05-06 15:12:32.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/IMPORTING/Makefile.am dxsamples-4.4.0/programs/IMPORTING/Makefile.am
+--- dxsamples-4.4.0.orig/programs/IMPORTING/Makefile.am	2002-04-30 20:53:19.000000000 +0200
++++ dxsamples-4.4.0/programs/IMPORTING/Makefile.am	2005-05-06 15:12:32.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -143,9 +119,9 @@ diff -urN dxsamples-4.3.2.orig/programs/IMPORTING/Makefile.am dxsamples-4.3.2/pr
  
  LINKLIST = \
           Categorical.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/INTERFACE_CONTROL/Makefile.am dxsamples-4.3.2/programs/INTERFACE_CONTROL/Makefile.am
---- dxsamples-4.3.2.orig/programs/INTERFACE_CONTROL/Makefile.am	2002-04-30 20:53:18.000000000 +0200
-+++ dxsamples-4.3.2/programs/INTERFACE_CONTROL/Makefile.am	2005-05-06 15:12:28.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/INTERFACE_CONTROL/Makefile.am dxsamples-4.4.0/programs/INTERFACE_CONTROL/Makefile.am
+--- dxsamples-4.4.0.orig/programs/INTERFACE_CONTROL/Makefile.am	2002-04-30 20:53:18.000000000 +0200
++++ dxsamples-4.4.0/programs/INTERFACE_CONTROL/Makefile.am	2005-05-06 15:12:28.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -154,9 +130,9 @@ diff -urN dxsamples-4.3.2.orig/programs/INTERFACE_CONTROL/Makefile.am dxsamples-
  
  LINKLIST = \
           DialogStyle.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/LOOPING/Makefile.am dxsamples-4.3.2/programs/LOOPING/Makefile.am
---- dxsamples-4.3.2.orig/programs/LOOPING/Makefile.am	2002-04-30 20:53:17.000000000 +0200
-+++ dxsamples-4.3.2/programs/LOOPING/Makefile.am	2005-05-06 15:12:17.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/LOOPING/Makefile.am dxsamples-4.4.0/programs/LOOPING/Makefile.am
+--- dxsamples-4.4.0.orig/programs/LOOPING/Makefile.am	2002-04-30 20:53:17.000000000 +0200
++++ dxsamples-4.4.0/programs/LOOPING/Makefile.am	2005-05-06 15:12:17.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -165,9 +141,9 @@ diff -urN dxsamples-4.3.2.orig/programs/LOOPING/Makefile.am dxsamples-4.3.2/prog
  
  LINKLIST = \
           Accumulate.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/MISC/Makefile.am dxsamples-4.3.2/programs/MISC/Makefile.am
---- dxsamples-4.3.2.orig/programs/MISC/Makefile.am	2002-04-30 20:53:13.000000000 +0200
-+++ dxsamples-4.3.2/programs/MISC/Makefile.am	2005-05-06 15:12:38.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/MISC/Makefile.am dxsamples-4.4.0/programs/MISC/Makefile.am
+--- dxsamples-4.4.0.orig/programs/MISC/Makefile.am	2002-04-30 20:53:13.000000000 +0200
++++ dxsamples-4.4.0/programs/MISC/Makefile.am	2005-05-06 15:12:38.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -176,9 +152,9 @@ diff -urN dxsamples-4.3.2.orig/programs/MISC/Makefile.am dxsamples-4.3.2/program
  
  LINKLIST = \
           CensusData.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/PLOTTING/Makefile.am dxsamples-4.3.2/programs/PLOTTING/Makefile.am
---- dxsamples-4.3.2.orig/programs/PLOTTING/Makefile.am	2002-04-30 20:53:12.000000000 +0200
-+++ dxsamples-4.3.2/programs/PLOTTING/Makefile.am	2005-05-06 15:11:54.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/PLOTTING/Makefile.am dxsamples-4.4.0/programs/PLOTTING/Makefile.am
+--- dxsamples-4.4.0.orig/programs/PLOTTING/Makefile.am	2002-04-30 20:53:12.000000000 +0200
++++ dxsamples-4.4.0/programs/PLOTTING/Makefile.am	2005-05-06 15:11:54.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -187,9 +163,9 @@ diff -urN dxsamples-4.3.2.orig/programs/PLOTTING/Makefile.am dxsamples-4.3.2/pro
  
  LINKLIST = \
           Categorical.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/PROBES/Makefile.am dxsamples-4.3.2/programs/PROBES/Makefile.am
---- dxsamples-4.3.2.orig/programs/PROBES/Makefile.am	2002-04-30 20:53:11.000000000 +0200
-+++ dxsamples-4.3.2/programs/PROBES/Makefile.am	2005-05-06 15:12:25.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/PROBES/Makefile.am dxsamples-4.4.0/programs/PROBES/Makefile.am
+--- dxsamples-4.4.0.orig/programs/PROBES/Makefile.am	2002-04-30 20:53:11.000000000 +0200
++++ dxsamples-4.4.0/programs/PROBES/Makefile.am	2005-05-06 15:12:25.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -198,9 +174,9 @@ diff -urN dxsamples-4.3.2.orig/programs/PROBES/Makefile.am dxsamples-4.3.2/progr
  
  LINKLIST = \
           PlotLine2.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/RENDERING/Makefile.am dxsamples-4.3.2/programs/RENDERING/Makefile.am
---- dxsamples-4.3.2.orig/programs/RENDERING/Makefile.am	2002-04-30 20:53:10.000000000 +0200
-+++ dxsamples-4.3.2/programs/RENDERING/Makefile.am	2005-05-06 15:12:35.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/RENDERING/Makefile.am dxsamples-4.4.0/programs/RENDERING/Makefile.am
+--- dxsamples-4.4.0.orig/programs/RENDERING/Makefile.am	2002-04-30 20:53:10.000000000 +0200
++++ dxsamples-4.4.0/programs/RENDERING/Makefile.am	2005-05-06 15:12:35.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -209,9 +185,9 @@ diff -urN dxsamples-4.3.2.orig/programs/RENDERING/Makefile.am dxsamples-4.3.2/pr
  
  LINKLIST = \
           FatLines.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/SCATTERED/Makefile.am dxsamples-4.3.2/programs/SCATTERED/Makefile.am
---- dxsamples-4.3.2.orig/programs/SCATTERED/Makefile.am	2002-04-30 20:53:08.000000000 +0200
-+++ dxsamples-4.3.2/programs/SCATTERED/Makefile.am	2005-05-06 15:11:43.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/SCATTERED/Makefile.am dxsamples-4.4.0/programs/SCATTERED/Makefile.am
+--- dxsamples-4.4.0.orig/programs/SCATTERED/Makefile.am	2002-04-30 20:53:08.000000000 +0200
++++ dxsamples-4.4.0/programs/SCATTERED/Makefile.am	2005-05-06 15:11:43.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -220,9 +196,9 @@ diff -urN dxsamples-4.3.2.orig/programs/SCATTERED/Makefile.am dxsamples-4.3.2/pr
  
  LINKLIST = \
           AnnotationGlyphs.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/SEQUENCER/Makefile.am dxsamples-4.3.2/programs/SEQUENCER/Makefile.am
---- dxsamples-4.3.2.orig/programs/SEQUENCER/Makefile.am	2002-04-30 20:53:07.000000000 +0200
-+++ dxsamples-4.3.2/programs/SEQUENCER/Makefile.am	2005-05-06 15:12:12.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/SEQUENCER/Makefile.am dxsamples-4.4.0/programs/SEQUENCER/Makefile.am
+--- dxsamples-4.4.0.orig/programs/SEQUENCER/Makefile.am	2002-04-30 20:53:07.000000000 +0200
++++ dxsamples-4.4.0/programs/SEQUENCER/Makefile.am	2005-05-06 15:12:12.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -231,9 +207,9 @@ diff -urN dxsamples-4.3.2.orig/programs/SEQUENCER/Makefile.am dxsamples-4.3.2/pr
  
  LINKLIST = \
           ContoursAndCaption.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/SIMPLE/Makefile.am dxsamples-4.3.2/programs/SIMPLE/Makefile.am
---- dxsamples-4.3.2.orig/programs/SIMPLE/Makefile.am	2002-04-30 20:53:06.000000000 +0200
-+++ dxsamples-4.3.2/programs/SIMPLE/Makefile.am	2005-05-06 15:12:22.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/SIMPLE/Makefile.am dxsamples-4.4.0/programs/SIMPLE/Makefile.am
+--- dxsamples-4.4.0.orig/programs/SIMPLE/Makefile.am	2002-04-30 20:53:06.000000000 +0200
++++ dxsamples-4.4.0/programs/SIMPLE/Makefile.am	2005-05-06 15:12:22.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -242,9 +218,9 @@ diff -urN dxsamples-4.3.2.orig/programs/SIMPLE/Makefile.am dxsamples-4.3.2/progr
  
  LINKLIST = \
           Arrange.cfg\
-diff -urN dxsamples-4.3.2.orig/programs/SUPERVISE/Makefile.am dxsamples-4.3.2/programs/SUPERVISE/Makefile.am
---- dxsamples-4.3.2.orig/programs/SUPERVISE/Makefile.am	2002-04-30 20:53:01.000000000 +0200
-+++ dxsamples-4.3.2/programs/SUPERVISE/Makefile.am	2005-05-06 15:11:50.000000000 +0200
+diff -urN dxsamples-4.4.0.orig/programs/SUPERVISE/Makefile.am dxsamples-4.4.0/programs/SUPERVISE/Makefile.am
+--- dxsamples-4.4.0.orig/programs/SUPERVISE/Makefile.am	2002-04-30 20:53:01.000000000 +0200
++++ dxsamples-4.4.0/programs/SUPERVISE/Makefile.am	2005-05-06 15:11:50.000000000 +0200
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
  
@@ -253,20 +229,8 @@ diff -urN dxsamples-4.3.2.orig/programs/SUPERVISE/Makefile.am dxsamples-4.3.2/pr
  
  LINKLIST = \
           Image_wo_UI.cfg\
-diff -urN dxsamples-4.3.2.orig/stereo/src/Makefile.am dxsamples-4.3.2/stereo/src/Makefile.am
---- dxsamples-4.3.2.orig/stereo/src/Makefile.am	2002-04-01 04:28:51.000000000 +0200
-+++ dxsamples-4.3.2/stereo/src/Makefile.am	2005-05-06 15:13:32.000000000 +0200
-@@ -7,7 +7,7 @@
- EXTRA_DIST = $(data_DATA) 
- 
- install-data-hook:
--	cp localmk $(datadir)/makefile
-+	cp localmk $(DESTDIR)/$(datadir)/makefile
- 
- uninstall-local:
- 	rm $(datadir)/makefile
---- dxsamples-4.3.2/java/Makefile.am.orig	2006-02-04 11:59:32.000000000 +0100
-+++ dxsamples-4.3.2/java/Makefile.am	2006-02-04 11:59:37.000000000 +0100
+--- dxsamples-4.4.0/java/Makefile.am.orig	2006-02-04 11:59:32.000000000 +0100
++++ dxsamples-4.4.0/java/Makefile.am	2006-02-04 11:59:37.000000000 +0100
 @@ -1,6 +1,6 @@
  ## Process this file with automake to produce Makefile.in
   
@@ -275,24 +239,24 @@ diff -urN dxsamples-4.3.2.orig/stereo/src/Makefile.am dxsamples-4.3.2/stereo/src
  javasamp_DATA = $(WEB_FILES)
  EXTRA_DIST = $(WEB_FILES)
   
---- dxsamples-4.3.2/java/nets/Makefile.am.orig	2006-02-04 12:34:45.000000000 +0100
-+++ dxsamples-4.3.2/java/nets/Makefile.am	2006-02-04 12:34:55.000000000 +0100
+--- dxsamples-4.4.0/java/nets/Makefile.am.orig	2006-02-04 12:34:45.000000000 +0100
++++ dxsamples-4.4.0/java/nets/Makefile.am	2006-02-04 12:34:55.000000000 +0100
 @@ -1,4 +1,4 @@
 -javanetsdir = $(prefix)/dx/java/server/nets
 +javanetsdir = $(prefix)/dx/samples/java/server/nets
  javanets_DATA = $(NET_FILES)
  EXTRA_DIST = $(NET_FILES)
  NET_FILES = AutoInsurance.cfg AutoInsurance.net \
---- dxsamples-4.3.2/java/userdata/Makefile.am.orig	2006-02-04 12:33:39.000000000 +0100
-+++ dxsamples-4.3.2/java/userdata/Makefile.am	2006-02-04 12:33:56.000000000 +0100
+--- dxsamples-4.4.0/java/userdata/Makefile.am.orig	2006-02-04 12:33:39.000000000 +0100
++++ dxsamples-4.4.0/java/userdata/Makefile.am	2006-02-04 12:33:56.000000000 +0100
 @@ -1,4 +1,4 @@
 -javadatadir = $(prefix)/dx/java/server/userdata
 +javadatadir = $(prefix)/dx/samples/java/server/userdata
  DATA_FILES = AutoInsurance.txt CCAll.dx Makefile.am Norm.dx apt.txt arf.txt asr.txt enhigh.cxn enhigh.txt enlow.cxn enlow.txt ibm94.txt ibm95.txt ibm96.txt mf1.txt npvcall.cm npvcall2.cm option.cm
  javadata_DATA = $(DATA_FILES)
  EXTRA_DIST = $(DATA_FILES)
---- dxsamples-4.3.2/java/usermacros/Makefile.am.orig	2006-02-04 12:39:29.000000000 +0100
-+++ dxsamples-4.3.2/java/usermacros/Makefile.am	2006-02-04 12:39:35.000000000 +0100
+--- dxsamples-4.4.0/java/usermacros/Makefile.am.orig	2006-02-04 12:39:29.000000000 +0100
++++ dxsamples-4.4.0/java/usermacros/Makefile.am	2006-02-04 12:39:35.000000000 +0100
 @@ -1,4 +1,4 @@
 -javamacrodir = $(prefix)/dx/java/server/usermacros
 +javamacrodir = $(prefix)/dx/samples/java/server/usermacros
