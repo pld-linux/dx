@@ -178,7 +178,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dx/lib_linux
 %{_datadir}/dx/ui
 %{_mandir}/manl/*
-%{_desktopdir}/*
+%{_desktopdir}/*.desktop
 %{_pixmapsdir}/*
 
 %files libs
