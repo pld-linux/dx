@@ -1,5 +1,5 @@
 Summary:	Excellent tool for making visualization of data
-Summary(pl):	Doskona≥e narzÍdzie do wizualizacji danych
+Summary(pl.UTF-8):   Doskona≈Çe narzƒôdzie do wizualizacji danych
 Name:		dx
 Version:	4.4.0
 Release:	1
@@ -39,69 +39,69 @@ system design is built on a standard interface environments. And its
 sophisticated data model provides users with great flexibility in
 creating visualizations.
 
-%description -l pl
-OpenDX jest w pe≥ni funkcjonalnym, o unikalnych moøliwo∂ciach,
-pakietem do wizualizacji danych naukowych, inøynierskich i
-analitycznych. Zosta≥ zaprojektowany w sposÛb otwarty, w oparciu o
-standardowe ∂rodowiska interfejsÛw. Jego przemy∂lany model danych
-daje uøytkownikom duø± elastyczno∂Ê w tworzeniu wizualizacji.
+%description -l pl.UTF-8
+OpenDX jest w pe≈Çni funkcjonalnym, o unikalnych mo≈ºliwo≈õciach,
+pakietem do wizualizacji danych naukowych, in≈ºynierskich i
+analitycznych. Zosta≈Ç zaprojektowany w spos√≥b otwarty, w oparciu o
+standardowe ≈õrodowiska interfejs√≥w. Jego przemy≈õlany model danych
+daje u≈ºytkownikom du≈ºƒÖ elastyczno≈õƒá w tworzeniu wizualizacji.
 
 %package libs
 Summary:	OpenDX shared libraries
-Summary(pl):	Biblioteki wspÛ≥dzielone OpenDX
+Summary(pl.UTF-8):   Biblioteki wsp√≥≈Çdzielone OpenDX
 Group:		Libraries
 
 %description libs
 OpenDX shared libraries.
 
-%description libs -l pl
-Biblioteki wspÛ≥dzielone OpenDX.
+%description libs -l pl.UTF-8
+Biblioteki wsp√≥≈Çdzielone OpenDX.
 
 %package devel
 Summary:	OpenDX development files
-Summary(pl):	Pliki nag≥Ûwkowe OpenDX
+Summary(pl.UTF-8):   Pliki nag≈Ç√≥wkowe OpenDX
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 
 %description devel
 OpenDX development files.
 
-%description devel -l pl
-Pliki nag≥Ûwkowe OpenDX oraz inne pliki, potrzebne do budowania.
+%description devel -l pl.UTF-8
+Pliki nag≈Ç√≥wkowe OpenDX oraz inne pliki, potrzebne do budowania.
 
 %package static
 Summary:	OpenDX static libraries
-Summary(pl):	Biblioteki statyczne OpenDX
+Summary(pl.UTF-8):   Biblioteki statyczne OpenDX
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 OpenDX static libraries.
 
-%description static -l pl
+%description static -l pl.UTF-8
 Biblioteki statyczne OpenDX.
 
 %package doc
 Summary:	OpenDX documentation
-Summary(pl):	Dokumentacja OpenDX
+Summary(pl.UTF-8):   Dokumentacja OpenDX
 Group:		Documentation
 
 %description doc
 Online help and html documentation for OpenDX.
 
-%description doc -l pl
-PodrÍczna pomoc oraz dokumentacja html dla OpenDX.
+%description doc -l pl.UTF-8
+Podrƒôczna pomoc oraz dokumentacja html dla OpenDX.
 
 %package examples
 Summary:	OpenDX Examples
-Summary(pl):	Przyk≥ady dla OpenDX
+Summary(pl.UTF-8):   Przyk≈Çady dla OpenDX
 Group:		Documentation
 
 %description examples
 Examples for OpenDX.
 
-%description examples -l pl
-Przyk≥ady dla OpenDX.
+%description examples -l pl.UTF-8
+Przyk≈Çady dla OpenDX.
 
 %prep
 %setup  -q -a 1
