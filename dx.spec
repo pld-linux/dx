@@ -1,5 +1,5 @@
 Summary:	Excellent tool for making visualization of data
-Summary(pl.UTF-8):   Doskonałe narzędzie do wizualizacji danych
+Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.0
 Release:	1
@@ -48,7 +48,7 @@ daje użytkownikom dużą elastyczność w tworzeniu wizualizacji.
 
 %package libs
 Summary:	OpenDX shared libraries
-Summary(pl.UTF-8):   Biblioteki współdzielone OpenDX
+Summary(pl.UTF-8):	Biblioteki współdzielone OpenDX
 Group:		Libraries
 
 %description libs
@@ -59,7 +59,7 @@ Biblioteki współdzielone OpenDX.
 
 %package devel
 Summary:	OpenDX development files
-Summary(pl.UTF-8):   Pliki nagłówkowe OpenDX
+Summary(pl.UTF-8):	Pliki nagłówkowe OpenDX
 Group:		Development/Libraries
 Requires:	%{name}-libs = %{version}-%{release}
 
@@ -71,7 +71,7 @@ Pliki nagłówkowe OpenDX oraz inne pliki, potrzebne do budowania.
 
 %package static
 Summary:	OpenDX static libraries
-Summary(pl.UTF-8):   Biblioteki statyczne OpenDX
+Summary(pl.UTF-8):	Biblioteki statyczne OpenDX
 Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
@@ -83,7 +83,7 @@ Biblioteki statyczne OpenDX.
 
 %package doc
 Summary:	OpenDX documentation
-Summary(pl.UTF-8):   Dokumentacja OpenDX
+Summary(pl.UTF-8):	Dokumentacja OpenDX
 Group:		Documentation
 
 %description doc
@@ -94,7 +94,7 @@ Podręczna pomoc oraz dokumentacja html dla OpenDX.
 
 %package examples
 Summary:	OpenDX Examples
-Summary(pl.UTF-8):   Przykłady dla OpenDX
+Summary(pl.UTF-8):	Przykłady dla OpenDX
 Group:		Documentation
 
 %description examples
