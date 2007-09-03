@@ -1,13 +1,13 @@
 Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
-Version:	4.4.0
+Version:	4.4.4
 Release:	1
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
-# Source0-md5:	8fe6a09faea4aa713a1540f51371b719
-Source1:	http://opendx.npaci.edu/source/%{name}samples-%{version}.tar.gz
+# Source0-md5:	6da0c4cd21d3c08f97b7662e3aee5b7b
+Source1:	http://opendx.npaci.edu/source/%{name}samples-4.4.0.tar.gz
 # Source1-md5:	e8f43722ca0a66282608bded7c0e4f93
 Source2:	%{name}.desktop
 Patch0:		%{name}-DESTDIR.patch
@@ -125,7 +125,7 @@ Przykłady dla OpenDX.
 	--enable-new-keylayout \
 	--without-javadx
 
-cd %{name}samples-%{version}
+cd %{name}samples-4.4.0
 %{__aclocal}
 %{__autoheader}
 %{__autoconf}
@@ -137,7 +137,7 @@ cd ..
 
 %{__make}
 
-%{__make} -C %{name}samples-%{version}
+%{__make} -C %{name}samples-4.4.0
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -145,7 +145,7 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-%{__make} -C %{name}samples-%{version} install \
+%{__make} -C %{name}samples-4.4.0 install \
 	DESTDIR=$RPM_BUILD_ROOT
 
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir},%{_desktopdir},%{_pixmapsdir}}
