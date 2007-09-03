@@ -14,6 +14,7 @@ Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-nolibs.patch
 Patch2:		dxsamples-DESTDIR.patch
 Patch3:		dxsamples-unused_bin.patch
+Patch4:		%{name}-include.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-devel
@@ -109,6 +110,7 @@ Przykłady dla OpenDX.
 %patch1 -p1
 %patch2 -p0
 %patch3 -p1
+%patch4 -p1
 
 %build
 %{__libtoolize}
