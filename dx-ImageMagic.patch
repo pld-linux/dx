@@ -1,0 +1,31 @@
+--- dx-4.4.4/configure.ac.orig	2006-08-21 23:56:08.000000000 +0200
++++ dx-4.4.4/configure.ac	2008-11-13 12:31:28.000000000 +0100
+@@ -801,7 +800,10 @@
+ 
+     failed=0;
+     passed=0;
++    old_CPPFLAGS="$CPPFLAGS"
++    CPPFLAGS="$CPPFLAGS -I/usr/include/ImageMagick"
+     AC_CHECK_HEADER([magick/api.h],[passed=`expr $passed + 1`],[failed=`expr $failed + 1`])
++    CPPFLAGS="$old_CPPFLAGS"
+ if test "$ARCH" = "intelnt" ; then
+     AC_CHECK_LIB(CORE_RL_magick_,Hopen,passed=`expr $passed + 1`,failed=`expr $failed + 1`,)
+     AC_MSG_CHECKING(if ImageMagick package is complete)
+@@ -836,7 +838,7 @@
+ 
+  if test "$HAVE_MC" = "yes" ; then
+     LIB_MAGICK="`Magick-config --ldflags` `Magick-config --libs`"
+-    AC_CHECK_LIB( Magick,GetImageInfo, passed=`expr $passed + 1`, failed=`expr $failed + 1`, [ $LIB_MAGICK ])
++    AC_CHECK_LIB( MagickCore,GetImageInfo, passed=`expr $passed + 1`, failed=`expr $failed + 1`, [ $LIB_MAGICK ])
+     AC_MSG_CHECKING(if ImageMagick package is complete)
+     if test $passed -gt 0
+     then
+@@ -850,7 +852,7 @@
+ 	LIB_MAGICK="$LIBS `Magick-config --ldflags` `Magick-config --libs`"
+ dnl UNIQUIFY will remove duplicate library tokens leaving the last instance.
+ 	AC_UTILS_UNIQUIFY($LIB_MAGICK, LIBS)
+-	FMT_LIBS="$FMT_LIBS libMagick.a"
++	FMT_LIBS="$FMT_LIBS libMagickCore.a"
+ 	AC_DEFINE(HAVE_LIBMAGICK, 1, [Define to 1 if you have the ImageMagick libraries])
+ 	AC_MSG_RESULT(yes)
+         have_magick='yes'
