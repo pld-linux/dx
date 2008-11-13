@@ -1,0 +1,38 @@
+--- dx-4.4.4/configure.ac.orig	2006-08-21 23:56:08.000000000 +0200
++++ dx-4.4.4/configure.ac	2008-11-13 12:11:34.000000000 +0100
+@@ -5,6 +5,7 @@
+ AC_INIT([dx],[4.4.4])
+ 
+ dnl Process this file with autoconf to produce a configure script.
++AC_CONFIG_MACRO_DIR([m4])
+ AC_CONFIG_SRCDIR([include/dx/arch.h])
+ AC_CONFIG_HEADERS([include/dxconfig.h])
+ AM_INIT_AUTOMAKE
+@@ -218,9 +219,9 @@
+ dnl End of command line options configuration
+ 
+ dnl Start DX configuration
+-AC_LANG([C++])
+ AC_CHECK_HEADERS(stdlib.h)
+ AC_LANG([C])
++AC_LANG([C++])
+ 
+ #
+ # Check for large file support
+@@ -871,7 +873,6 @@
+ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[int a = false;]])],
+   [AC_DEFINE(CXX_HAS_FALSE, 1, [Define to 1 if c++ compiler defines false])],
+   [AC_DEFINE(CXX_HAS_FALSE, 0)])
+-AC_CHECK_FUNCS(getdtablesize)
+ 
+ AC_LANG([C])
+ 
+@@ -882,7 +883,7 @@
+         pipe _pipe _popen popen _pclose pclose random rand srandom \
+ 	shmat getopt srand opendir _findfirst strrstr strcasecmp \
+ 	stricmp getpid _getpid unlink _unlink getlogin isatty _isatty \
+-	setsockopt isnan finite )
++	setsockopt isnan finite getdtablesize)
+ 
+ AC_MSG_CHECKING(if RAND_MAX defined)
+ AC_COMPILE_IFELSE(
