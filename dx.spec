@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	4
+Release:	4.1
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -15,6 +15,8 @@ Patch1:		%{name}-nolibs.patch
 Patch2:		dxsamples-DESTDIR.patch
 Patch3:		dxsamples-unused_bin.patch
 Patch4:		%{name}-include.patch
+Patch5:		%{name}-ac.patch
+Patch6:		%{name}-ImageMagic.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-devel
@@ -111,10 +113,12 @@ Przykłady dla OpenDX.
 %patch2 -p0
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
+%patch6 -p1
 
 %build
 %{__libtoolize}
-%{__aclocal}
+%{__aclocal} -I m4
 %{__autoheader}
 %{__autoconf}
 %{__automake}
