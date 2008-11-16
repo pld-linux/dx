@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	4.1
+Release:	5
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -17,9 +17,12 @@ Patch3:		dxsamples-unused_bin.patch
 Patch4:		%{name}-include.patch
 Patch5:		%{name}-ac.patch
 Patch6:		%{name}-ImageMagic.patch
+Patch7:		%{name}-open.patch
+Patch8:		%{name}-gcc43.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-devel
+BuildRequires:	OpenGL-GLU-devel
 BuildRequires:	autoconf >= 2.57
 BuildRequires:	automake
 BuildRequires:	bison
@@ -30,6 +33,9 @@ BuildRequires:	libtool
 BuildRequires:	libtiff-devel
 BuildRequires:	motif-devel
 BuildRequires:	netcdf-devel
+BuildRequires:	xorg-lib-libXinerama-devel
+BuildRequires:	xorg-lib-libXpm-devel
+Requires:	openssh-clients
 Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -115,6 +121,8 @@ Przykłady dla OpenDX.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
+%patch8 -p1
 
 %build
 %{__libtoolize}
@@ -129,7 +137,8 @@ Przykłady dla OpenDX.
 	--disable-dependency-tracking \
 	--enable-smp-linux \
 	--enable-new-keylayout \
-	--without-javadx
+	--without-javadx \
+	--with-rsh=%{_bindir}/ssh
 
 cd %{name}samples-4.4.0
 %{__aclocal}
@@ -141,9 +150,9 @@ cd %{name}samples-4.4.0
 	--without-javadx
 cd ..
 
-%{__make}
+%{__make} -j1
 
-%{__make} -C %{name}samples-4.4.0
+%{__make} -j1 -C %{name}samples-4.4.0
 
 %install
 rm -rf $RPM_BUILD_ROOT
