@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	9
+Release:	10
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -40,6 +40,7 @@ Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		specflags_ia32	-fomit-frame-pointer
+%define		skip_post_check_so	libDXL.so.*
 
 %description
 OpenDX is a uniquely powerful, full-featured software package for the
@@ -176,7 +177,7 @@ mv $RPM_BUILD_ROOT%{_datadir}/dx/bin_linux $RPM_BUILD_ROOT%{_libdir}/dx
 mv $RPM_BUILD_ROOT%{_examplesdir}/dx/samples/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 ln -s %{_libdir}/dx $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux
 ln -s %{_libdir}/dx/bin_linux $RPM_BUILD_ROOT%{_datadir}/dx
-rm -rf $RPM_BUILD_ROOT%{_datadir}/{bin,dx/{bin/dx,man,include,doc}}
+%{__rm} -r $RPM_BUILD_ROOT%{_datadir}/{bin,dx/{bin/dx,man,include,doc}}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
