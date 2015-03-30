@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	17
+Release:	18
 License:	IPL
 Group:		Applications
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -12,8 +12,8 @@ Source1:	http://opendx.npaci.edu/source/%{name}samples-4.4.0.tar.gz
 Source2:	%{name}.desktop
 Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-nolibs.patch
-Patch2:		dxsamples-DESTDIR.patch
-Patch3:		dxsamples-unused_bin.patch
+Patch2:		%{name}samples-DESTDIR.patch
+Patch3:		%{name}samples-unused_bin.patch
 Patch4:		%{name}-include.patch
 Patch5:		%{name}-ac.patch
 Patch6:		%{name}-ImageMagic.patch
@@ -22,22 +22,22 @@ Patch8:		%{name}-gcc43.patch
 Patch9:		format-security.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
-BuildRequires:	OpenGL-devel
 BuildRequires:	OpenGL-GLU-devel
+BuildRequires:	OpenGL-devel
 BuildRequires:	autoconf >= 2.57
 BuildRequires:	automake
 BuildRequires:	bison
 BuildRequires:	flex
 BuildRequires:	hdf-devel
 BuildRequires:	libjpeg-devel
-BuildRequires:	libtool
 BuildRequires:	libtiff-devel
+BuildRequires:	libtool
 BuildRequires:	motif-devel
 BuildRequires:	netcdf-devel
 BuildRequires:	xorg-lib-libXinerama-devel
 BuildRequires:	xorg-lib-libXpm-devel
-Requires:	openssh-clients
 Requires:	%{name}-libs = %{version}-%{release}
+Requires:	openssh-clients
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		specflags_ia32	-fomit-frame-pointer
@@ -54,8 +54,8 @@ creating visualizations.
 OpenDX jest w pełni funkcjonalnym, o unikalnych możliwościach,
 pakietem do wizualizacji danych naukowych, inżynierskich i
 analitycznych. Został zaprojektowany w sposób otwarty, w oparciu o
-standardowe środowiska interfejsów. Jego przemyślany model danych
-daje użytkownikom dużą elastyczność w tworzeniu wizualizacji.
+standardowe środowiska interfejsów. Jego przemyślany model danych daje
+użytkownikom dużą elastyczność w tworzeniu wizualizacji.
 
 %package libs
 Summary:	OpenDX shared libraries
@@ -96,6 +96,9 @@ Biblioteki statyczne OpenDX.
 Summary:	OpenDX documentation
 Summary(pl.UTF-8):	Dokumentacja OpenDX
 Group:		Documentation
+%if "%{_rpmversion}" >= "5"
+BuildArch:	noarch
+%endif
 
 %description doc
 Online help and html documentation for OpenDX.
@@ -107,6 +110,9 @@ Podręczna pomoc oraz dokumentacja html dla OpenDX.
 Summary:	OpenDX Examples
 Summary(pl.UTF-8):	Przykłady dla OpenDX
 Group:		Documentation
+%if "%{_rpmversion}" >= "5"
+BuildArch:	noarch
+%endif
 
 %description examples
 Examples for OpenDX.
@@ -169,8 +175,8 @@ rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_libdir},%{_includedir},%{_mandir},%{_desktopdir},%{_pixmapsdir}}
 install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
-install %{SOURCE2} $RPM_BUILD_ROOT%{_desktopdir}
-install src/uipp/ui/icon50.xpm $RPM_BUILD_ROOT%{_pixmapsdir}/dx.xpm
+cp -p %{SOURCE2} $RPM_BUILD_ROOT%{_desktopdir}
+cp -p src/uipp/ui/icon50.xpm $RPM_BUILD_ROOT%{_pixmapsdir}/dx.xpm
 mv $RPM_BUILD_ROOT%{_datadir}/bin/dx $RPM_BUILD_ROOT%{_bindir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/man/manl $RPM_BUILD_ROOT%{_mandir}
 mv $RPM_BUILD_ROOT%{_datadir}/dx/include/* $RPM_BUILD_ROOT%{_includedir}
