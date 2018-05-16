@@ -1,0 +1,275 @@
+--- dx-4.4.4/src/uipp/dxuilib/ticks_in.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/ticks_in.bm	2018-05-15 22:10:49.143478556 +0200
+@@ -1,6 +1,6 @@
+ #define ticks_in_width 18
+ #define ticks_in_height 16
+-static char ticks_in_bits[] = {
++static unsigned char ticks_in_bits[] = {
+    0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x82, 0x20, 0x00,
+    0x82, 0x20, 0x00, 0x92, 0x24, 0x01, 0x92, 0x24, 0x01, 0x92, 0x24, 0x01,
+--- dx-4.4.4/src/uipp/dxuilib/ticks_out.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/ticks_out.bm	2018-05-15 22:11:12.988070732 +0200
+@@ -1,6 +1,6 @@
+ #define ticks_out_width 18
+ #define ticks_out_height 16
+-static char ticks_out_bits[] = {
++static unsigned char ticks_out_bits[] = {
+    0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0xfe, 0xff, 0x03, 0x24, 0x49, 0x02,
+--- dx-4.4.4/src/uipp/dxuilib/ticks_in_ins.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/ticks_in_ins.bm	2018-05-15 22:11:28.128870621 +0200
+@@ -1,6 +1,6 @@
+ #define ticks_in_ins_width 18
+ #define ticks_in_ins_height 16
+-static char ticks_in_ins_bits[] = {
++static unsigned char ticks_in_ins_bits[] = {
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x82, 0x20, 0x00, 0x10, 0x04, 0x01, 0x82, 0x20, 0x00, 0x10, 0x04, 0x01,
+--- dx-4.4.4/src/uipp/dxuilib/ticks_out_ins.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/ticks_out_ins.bm	2018-05-15 22:11:40.539526276 +0200
+@@ -1,6 +1,6 @@
+ #define ticks_out_ins_width 18
+ #define ticks_out_ins_height 16
+-static char ticks_out_ins_bits[] = {
++static unsigned char ticks_out_ins_bits[] = {
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0xaa, 0xaa, 0x02, 0x04, 0x41, 0x00,
+--- dx-4.4.4/src/uipp/dxuilib/AutoAxesDialog.C.orig	2003-09-26 17:49:12.000000000 +0200
++++ dx-4.4.4/src/uipp/dxuilib/AutoAxesDialog.C	2018-05-15 22:15:05.863706893 +0200
+@@ -1791,16 +1791,16 @@
+ 	    XmNdepth, &depth, XmNscreen, &scr, NULL);
+ 	Pixel fg = BlackPixelOfScreen(scr);
+ 	AutoAxesDialog::TicksIn = XCreatePixmapFromBitmapData (XtDisplay(root), 
+-	    XtWindow(root), ticks_in_bits, ticks_in_width, ticks_in_height,
++	    XtWindow(root), (char *)ticks_in_bits, ticks_in_width, ticks_in_height,
+ 	    fg, bg, depth);
+ 	AutoAxesDialog::TicksOut = XCreatePixmapFromBitmapData (XtDisplay(root), 
+-	    XtWindow(root), ticks_out_bits, ticks_out_width, ticks_out_height,
++	    XtWindow(root), (char *)ticks_out_bits, ticks_out_width, ticks_out_height,
+ 	    fg, bg, depth);
+ 	AutoAxesDialog::TicksInGrey = XCreatePixmapFromBitmapData (XtDisplay(root), 
+-	    XtWindow(root), ticks_in_ins_bits, ticks_in_ins_width, ticks_in_ins_height,
++	    XtWindow(root), (char *)ticks_in_ins_bits, ticks_in_ins_width, ticks_in_ins_height,
+ 	    fg, bg, depth);
+ 	AutoAxesDialog::TicksOutGrey = XCreatePixmapFromBitmapData (XtDisplay(root), 
+-	    XtWindow(root),ticks_out_ins_bits, ticks_out_ins_width, ticks_out_ins_height,
++	    XtWindow(root), (char *)ticks_out_ins_bits, ticks_out_ins_width, ticks_out_ins_height,
+ 	    fg, bg, depth);
+ 
+ 
+--- dx-4.4.4/src/uipp/dxuilib/anchor.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/anchor.bm	2018-05-16 05:25:49.102454052 +0200
+@@ -2,7 +2,7 @@
+ #define anchor_height 17
+ #define anchor_x_hot -1
+ #define anchor_y_hot -1
+-static char anchor_bits[] = {
++static unsigned char anchor_bits[] = {
+    0x80, 0x03, 0x00, 0x40, 0x05, 0x00, 0xc0, 0x02, 0x00, 0x40, 0x05, 0x00,
+    0x80, 0x02, 0x00, 0x10, 0x11, 0x00, 0x30, 0x09, 0x00, 0x50, 0x15, 0x00,
+    0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x83, 0x82, 0x00, 0x85, 0x41, 0x01,
+--- dx-4.4.4/src/uipp/dxuilib/DXWindow.C.orig	2006-06-29 20:21:22.000000000 +0200
++++ dx-4.4.4/src/uipp/dxuilib/DXWindow.C	2018-05-16 05:26:29.241236789 +0200
+@@ -245,7 +245,7 @@
+             XCreatePixmapFromBitmapData
+                 (XtDisplay(this->menuBar),
+                  wind,
+-                 anchor_bits,
++                 (char *)anchor_bits,
+                  anchor_width,
+                  anchor_height,
+                  foreground,
+--- dx-4.4.4/src/uipp/dxuilib/pagedrag.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/pagedrag.bm	2018-05-16 15:54:28.201914729 +0200
+@@ -1,6 +1,6 @@
+ #define pagedrag_width 32
+ #define pagedrag_height 32
+-static char pagedrag_bits[] = {
++static unsigned char pagedrag_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f, 0x00, 0x00, 0x04, 0x30, 0x00, 0x00,
+    0x04, 0xf0, 0x01, 0x00, 0x04, 0xb0, 0x01, 0x00, 0x07, 0xf0, 0xff, 0x0f,
+    0x01, 0x00, 0x00, 0x0c, 0x01, 0x00, 0x00, 0x0c, 0x01, 0x00, 0x00, 0x7c,
+--- dx-4.4.4/src/uipp/dxuilib/pagedragmask.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/pagedragmask.bm	2018-05-16 15:55:52.433030968 +0200
+@@ -1,6 +1,6 @@
+ #define pagedragmask_width 32
+ #define pagedragmask_height 32
+-static char pagedragmask_bits[] = {
++static unsigned char pagedragmask_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0xfc, 0x3f, 0x00, 0x00, 0xfc, 0x3f, 0x00, 0x00,
+    0x5c, 0xf5, 0x01, 0x00, 0xac, 0xfa, 0x01, 0x00, 0x5f, 0xf5, 0xff, 0x0f,
+    0xaf, 0xfa, 0xff, 0x0f, 0x57, 0x55, 0x55, 0x0d, 0xab, 0xaa, 0xaa, 0x7e,
+--- dx-4.4.4/src/uipp/dxuilib/animation.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/animation.bm	2018-05-16 15:54:44.996135230 +0200
+@@ -1,6 +1,6 @@
+ #define animation_width 90
+ #define animation_height 23
+-static char animation_bits[] = {
++static unsigned char animation_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+--- dx-4.4.4/src/uipp/dxuilib/anim_mask.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/anim_mask.bm	2018-05-16 15:56:11.617377728 +0200
+@@ -1,6 +1,6 @@
+ #define anim_mask_width 90
+ #define anim_mask_height 23
+-static char anim_mask_bits[] = {
++static unsigned char anim_mask_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00,
+--- dx-4.4.4/src/uipp/dxuilib/PageTab.C.orig	2003-07-12 02:12:22.000000000 +0200
++++ dx-4.4.4/src/uipp/dxuilib/PageTab.C	2018-05-16 15:55:41.449117401 +0200
+@@ -96,9 +96,9 @@
+         PageTab::DragIcon = this->createDragIcon(pagedrag_width, pagedrag_height,
+ 	     (char *)pagedrag_bits, (char *)pagedragmask_bits);
+ 	PageTab::AnimationPixmap = XCreateBitmapFromData(XtDisplay(p),
+-	      XtWindow(p), animation_bits, animation_width, animation_height);
++	      XtWindow(p), (char *)animation_bits, animation_width, animation_height);
+ 	      PageTab::AnimationMaskPixmap = XCreateBitmapFromData(XtDisplay(p),
+-	      XtWindow(p), anim_mask_bits, anim_mask_width, anim_mask_height);
++	      XtWindow(p), (char *)anim_mask_bits, anim_mask_width, anim_mask_height);
+ 	PageTab::ClassInitialized = TRUE;
+     }
+ 
+--- dx-4.4.4/src/uipp/dxuilib/postit.bm.orig	1999-03-24 16:17:49.000000000 +0100
++++ dx-4.4.4/src/uipp/dxuilib/postit.bm	2018-05-16 16:28:36.143418469 +0200
+@@ -2,7 +2,7 @@
+ #define postit_height 24
+ #define postit_x_hot 11
+ #define postit_y_hot 0
+-static char postit_bits[] = {
++static unsigned char postit_bits[] = {
+    0x00, 0x00, 0x00, 0xaa, 0xaa, 0xaa, 0x54, 0x55, 0xd5, 0xaa, 0xaa, 0xaa,
+    0x54, 0x41, 0xd5, 0xaa, 0xa8, 0xaa, 0x54, 0x75, 0xd5, 0xaa, 0xbc, 0xaa,
+    0x54, 0x55, 0xd5, 0xaa, 0xaa, 0xaa, 0x54, 0x41, 0xd5, 0xaa, 0xa8, 0xaa,
+--- dx-4.4.4/src/uipp/dxuilib/VPEPostIt.C.orig	2002-10-24 06:37:59.000000000 +0200
++++ dx-4.4.4/src/uipp/dxuilib/VPEPostIt.C	2018-05-16 16:28:53.697678894 +0200
+@@ -213,7 +213,7 @@
+ 	XFreePixmap(d, this->bg_pixmap);
+ 	this->bg_pixmap = NUL(Pixmap);
+     }
+-    this->bg_pixmap = XCreatePixmapFromBitmapData(d, w, postit_bits,
++    this->bg_pixmap = XCreatePixmapFromBitmapData(d, w, (char *)postit_bits,
+ 	postit_width, postit_height, fg, bg, depth);
+     XtVaSetValues (this->customPart,
+ 	XmNlabelType, XmPIXMAP,
+--- dx-4.4.4/src/uipp/base/plus.bm.orig	2003-07-12 02:12:15.000000000 +0200
++++ dx-4.4.4/src/uipp/base/plus.bm	2018-05-16 17:04:42.001187910 +0200
+@@ -1,6 +1,6 @@
+ #define plus_width 12
+ #define plus_height 14
+-static char plus_bits[] = {
++static unsigned char plus_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0xfe, 0x0f, 0x02, 0x08, 0x42, 0x08, 0x42, 0x08,
+    0x42, 0x08, 0xfa, 0x0b, 0x42, 0x08, 0x42, 0x08, 0x42, 0x08, 0x02, 0x08,
+    0xfe, 0x0f, 0x00, 0x00};
+--- dx-4.4.4/src/uipp/base/minus.bm.orig	2003-07-12 02:12:15.000000000 +0200
++++ dx-4.4.4/src/uipp/base/minus.bm	2018-05-16 17:04:53.428458615 +0200
+@@ -1,6 +1,6 @@
+ #define minus_width 12
+ #define minus_height 14
+-static char minus_bits[] = {
++static unsigned char minus_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0xfe, 0x0f, 0x02, 0x08, 0x02, 0x08, 0x02, 0x08,
+    0x02, 0x08, 0xfa, 0x0b, 0x02, 0x08, 0x02, 0x08, 0x02, 0x08, 0x02, 0x08,
+    0xfe, 0x0f, 0x00, 0x00};
+--- dx-4.4.4/src/uipp/base/TreeView.C.orig	2003-07-12 02:12:15.000000000 +0200
++++ dx-4.4.4/src/uipp/base/TreeView.C	2018-05-16 17:05:15.929648011 +0200
+@@ -316,9 +316,9 @@
+     }
+ 
+     if (TreeView::Plus == XmUNSPECIFIED_PIXMAP) {
+-	TreeView::Plus = XCreatePixmapFromBitmapData(d,win,plus_bits,plus_width,
++	TreeView::Plus = XCreatePixmapFromBitmapData(d,win,(char *)plus_bits,plus_width,
+ 	    plus_height,this->line_color,bg,depth);
+-	TreeView::Minus = XCreatePixmapFromBitmapData(d,win,minus_bits,minus_width,
++	TreeView::Minus = XCreatePixmapFromBitmapData(d,win,(char *)minus_bits,minus_width,
+ 	    minus_height,this->line_color,bg,depth);
+     }
+ 
+--- dx-4.4.4/src/uipp/prompter/row_sens.bm.orig	1999-04-05 15:33:51.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/row_sens.bm	2018-05-16 17:11:23.349069001 +0200
+@@ -1,6 +1,6 @@
+ #define row_sens_width 20
+ #define row_sens_height 20
+-static char row_sens_bits[] = {
++static unsigned char row_sens_bits[] = {
+    0x82, 0xc1, 0x00, 0x82, 0xc1, 0x00, 0x42, 0xa1, 0x00, 0x42, 0xa1, 0x00,
+    0x42, 0xa1, 0x00, 0x42, 0xa1, 0x00, 0x22, 0x91, 0x00, 0x22, 0x91, 0x00,
+    0x22, 0x91, 0x00, 0x22, 0x91, 0x00, 0x12, 0x89, 0x00, 0x12, 0x89, 0x00,
+--- dx-4.4.4/src/uipp/prompter/col_sens.bm.orig	1999-04-05 15:33:50.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/col_sens.bm	2018-05-16 17:11:38.299859234 +0200
+@@ -1,6 +1,6 @@
+ #define col_sens_width 20
+ #define col_sens_height 20
+-static char col_sens_bits[] = {
++static unsigned char col_sens_bits[] = {
+    0x00, 0x00, 0x00, 0xff, 0xff, 0x0f, 0x00, 0x00, 0x0c, 0x00, 0xc0, 0x03,
+    0x00, 0x3c, 0x00, 0xc0, 0x03, 0x00, 0x3c, 0x00, 0x00, 0x03, 0x00, 0x00,
+    0xff, 0xff, 0x0f, 0x00, 0x00, 0x0c, 0x00, 0xc0, 0x03, 0x00, 0x3c, 0x00,
+--- dx-4.4.4/src/uipp/prompter/row_insens.bm.orig	1999-04-05 15:33:51.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/row_insens.bm	2018-05-16 17:11:54.267369873 +0200
+@@ -1,6 +1,6 @@
+ #define row_insens_width 20
+ #define row_insens_height 20
+-static char row_insens_bits[] = {
++static unsigned char row_insens_bits[] = {
+    0x02, 0x81, 0x00, 0x80, 0x40, 0x00, 0x02, 0x81, 0x00, 0x40, 0x20, 0x00,
+    0x02, 0x81, 0x00, 0x40, 0x20, 0x00, 0x02, 0x81, 0x00, 0x20, 0x10, 0x00,
+    0x02, 0x81, 0x00, 0x20, 0x10, 0x00, 0x02, 0x81, 0x00, 0x10, 0x08, 0x00,
+--- dx-4.4.4/src/uipp/prompter/col_insens.bm.orig	1999-04-05 15:33:49.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/col_insens.bm	2018-05-16 17:12:11.441610961 +0200
+@@ -1,6 +1,6 @@
+ #define col_insens_width 20
+ #define col_insens_height 20
+-static char col_insens_bits[] = {
++static unsigned char col_insens_bits[] = {
+    0x00, 0x00, 0x00, 0x55, 0x55, 0x05, 0x00, 0x00, 0x08, 0x00, 0x80, 0x02,
+    0x00, 0x28, 0x00, 0x80, 0x02, 0x00, 0x28, 0x00, 0x00, 0x02, 0x00, 0x00,
+    0x55, 0x55, 0x05, 0x00, 0x00, 0x08, 0x00, 0x80, 0x02, 0x00, 0x28, 0x00,
+--- dx-4.4.4/src/uipp/prompter/grid1.bm.orig	1999-04-05 15:33:50.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/grid1.bm	2018-05-16 17:14:01.830778982 +0200
+@@ -1,6 +1,6 @@
+ #define grid1_width 37
+ #define grid1_height 37
+-static char grid1_bits[] = {
++static unsigned char grid1_bits[] = {
+    0xff, 0xff, 0xff, 0xff, 0x1f, 0x41, 0x10, 0x04, 0x41, 0x10, 0x41, 0x10,
+    0x04, 0x41, 0x10, 0x41, 0x10, 0x04, 0x41, 0x10, 0x41, 0x10, 0x04, 0x41,
+    0x10, 0x41, 0x10, 0x04, 0x41, 0x10, 0xff, 0xff, 0xff, 0xff, 0x1f, 0x41,
+--- dx-4.4.4/src/uipp/prompter/grid2.bm.orig	1999-04-05 15:33:50.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/grid2.bm	2018-05-16 17:14:13.634736221 +0200
+@@ -1,6 +1,6 @@
+ #define grid2_width 37
+ #define grid2_height 37
+-static char grid2_bits[] = {
++static unsigned char grid2_bits[] = {
+    0xff, 0xff, 0xff, 0xff, 0x1f, 0x41, 0x0a, 0x40, 0x02, 0x10, 0x41, 0x0a,
+    0x40, 0x02, 0x10, 0x41, 0x0a, 0x40, 0x02, 0x10, 0xff, 0xff, 0xff, 0xff,
+    0x1f, 0x41, 0x0a, 0x40, 0x02, 0x10, 0x41, 0x0a, 0x40, 0x02, 0x10, 0xff,
+--- dx-4.4.4/src/uipp/prompter/grid3.bm.orig	1999-04-05 15:33:50.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/grid3.bm	2018-05-16 17:14:25.632037013 +0200
+@@ -1,6 +1,6 @@
+ #define grid3_width 37
+ #define grid3_height 37
+-static char grid3_bits[] = {
++static unsigned char grid3_bits[] = {
+    0x00, 0xf0, 0xff, 0x01, 0x00, 0x00, 0x0f, 0x04, 0x1e, 0x00, 0xe0, 0x00,
+    0x04, 0xe0, 0x00, 0x98, 0x00, 0x04, 0x20, 0x03, 0x86, 0x00, 0x04, 0x20,
+    0x0c, 0x01, 0x01, 0x04, 0x10, 0x10, 0x01, 0x01, 0x04, 0x10, 0x10, 0x02,
+--- dx-4.4.4/src/uipp/prompter/grid4.bm.orig	1999-04-05 15:33:51.000000000 +0200
++++ dx-4.4.4/src/uipp/prompter/grid4.bm	2018-05-16 17:14:44.203018593 +0200
+@@ -1,6 +1,6 @@
+ #define grid4_width 37
+ #define grid4_height 37
+-static char grid4_bits[] = {
++static unsigned char grid4_bits[] = {
+    0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x06, 0x18, 0x00,
+    0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00,
+    0x00, 0x00, 0x30, 0x18, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00,

@@ -2,9 +2,9 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	19
+Release:	20
 License:	IPL
-Group:		Applications
+Group:		Applications/Science
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 # Source0-md5:	6da0c4cd21d3c08f97b7662e3aee5b7b
 Source1:	http://opendx.npaci.edu/source/%{name}samples-4.4.0.tar.gz
@@ -20,6 +20,8 @@ Patch6:		%{name}-ImageMagic.patch
 Patch7:		%{name}-open.patch
 Patch8:		%{name}-gcc43.patch
 Patch9:		format-security.patch
+Patch10:	%{name}-narrowing.patch
+Patch11:	%{name}-conversion.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-GLU-devel
@@ -27,15 +29,24 @@ BuildRequires:	OpenGL-devel
 BuildRequires:	autoconf >= 2.57
 BuildRequires:	automake
 BuildRequires:	bison
+BuildRequires:	cdflib-devel
 BuildRequires:	flex
 BuildRequires:	hdf-devel
 BuildRequires:	libjpeg-devel
 BuildRequires:	libtiff-devel
+BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
 BuildRequires:	motif-devel
 BuildRequires:	netcdf-devel
+BuildRequires:	xorg-lib-libICE-devel
+BuildRequires:	xorg-lib-libSM-devel
+BuildRequires:	xorg-lib-libX11-devel
+BuildRequires:	xorg-lib-libXext-devel
 BuildRequires:	xorg-lib-libXinerama-devel
+BuildRequires:	xorg-lib-libXmu-devel
+BuildRequires:	xorg-lib-libXp-devel
 BuildRequires:	xorg-lib-libXpm-devel
+BuildRequires:	xorg-lib-libXt-devel
 Requires:	%{name}-libs = %{version}-%{release}
 Requires:	openssh-clients
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -132,6 +143,8 @@ Przykłady dla OpenDX.
 %patch7 -p1
 %patch8 -p1
 %patch9 -p1
+%patch10 -p1
+%patch11 -p1
 
 %build
 %{__libtoolize}
@@ -177,12 +190,12 @@ install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 
 cp -p %{SOURCE2} $RPM_BUILD_ROOT%{_desktopdir}
 cp -p src/uipp/ui/icon50.xpm $RPM_BUILD_ROOT%{_pixmapsdir}/dx.xpm
-mv $RPM_BUILD_ROOT%{_datadir}/bin/dx $RPM_BUILD_ROOT%{_bindir}
-mv $RPM_BUILD_ROOT%{_datadir}/dx/man/manl $RPM_BUILD_ROOT%{_mandir}
-mv $RPM_BUILD_ROOT%{_datadir}/dx/include/* $RPM_BUILD_ROOT%{_includedir}
-mv $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux $RPM_BUILD_ROOT%{_libdir}/dx
-mv $RPM_BUILD_ROOT%{_datadir}/dx/bin_linux $RPM_BUILD_ROOT%{_libdir}/dx
-mv $RPM_BUILD_ROOT%{_examplesdir}/dx/samples/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/bin/dx $RPM_BUILD_ROOT%{_bindir}
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/dx/man/manl $RPM_BUILD_ROOT%{_mandir}
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/dx/include/* $RPM_BUILD_ROOT%{_includedir}
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux $RPM_BUILD_ROOT%{_libdir}/dx
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/dx/bin_linux $RPM_BUILD_ROOT%{_libdir}/dx
+%{__mv} $RPM_BUILD_ROOT%{_examplesdir}/dx/samples/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
 ln -s %{_libdir}/dx $RPM_BUILD_ROOT%{_datadir}/dx/lib_linux
 ln -s %{_libdir}/dx/bin_linux $RPM_BUILD_ROOT%{_datadir}/dx
 %{__rm} -r $RPM_BUILD_ROOT%{_datadir}/{bin,dx/{bin/dx,man,include,doc}}
