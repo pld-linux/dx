@@ -152,6 +152,7 @@ Przykłady dla OpenDX.
 %{__autoheader}
 %{__autoconf}
 %{__automake}
+CPPFLAGS="%{rpmcppflags} -I/usr/include/cdf"
 %configure \
 	--prefix=%{_datadir} \
 	--enable-shared \
@@ -206,7 +207,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc doc/README*
-%attr(755,root,root) %{_bindir}/*
+%attr(755,root,root) %{_bindir}/dx
 %dir %{_datadir}/dx
 %attr(755,root,root) %{_datadir}/dx/bin
 %{_datadir}/dx/bin_linux
@@ -214,30 +215,36 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dx/lib
 %{_datadir}/dx/lib_linux
 %{_datadir}/dx/ui
-%{_mandir}/manl/*
-%{_desktopdir}/*.desktop
-%{_pixmapsdir}/*
+# FIXME: should be dx(1)
+%{_mandir}/manl/dx.l*
+%{_desktopdir}/dx.desktop
+%{_pixmapsdir}/dx.xpm
 
 %files libs
 %defattr(644,root,root,755)
 %dir %{_libdir}/dx
-%attr(755,root,root) %{_libdir}/dx/bin_linux
-%attr(755,root,root) %{_libdir}/dx/lib*.so.*
+%dir %{_libdir}/dx/bin_linux
+%attr(755,root,root) %{_libdir}/dx/bin_linux/*
+%attr(755,root,root) %{_libdir}/dx/libDX*.so.*
 
 %files devel
 %defattr(644,root,root,755)
-%{_includedir}/*
-%{_libdir}/dx/*.mak
-%{_libdir}/dx/*.la
-%{_libdir}/dx/*.so
+%attr(755,root,root) %{_libdir}/dx/libDX*.so
+%{_includedir}/dx
+%{_includedir}/dxconfig.h
+%{_includedir}/dxl.h
+%{_includedir}/dxstereo.h
+%{_libdir}/dx/libDX*.la
+%{_libdir}/dx/arch.mak
 
 %files static
 %defattr(644,root,root,755)
-%{_libdir}/dx/*.a
+%{_libdir}/dx/libDX*.a
 
 %files doc
 %defattr(644,root,root,755)
-%{_datadir}/dx/h*
+%{_datadir}/dx/help
+%{_datadir}/dx/html
 
 %files examples
 %defattr(644,root,root,755)
