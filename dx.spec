@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	23
+Release:	24
 License:	IPL
 Group:		Applications/Science
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -38,6 +38,7 @@ BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
 BuildRequires:	motif-devel
 BuildRequires:	netcdf-devel
+BuildRequires:	rpmbuild(macros) >= 1.752
 BuildRequires:	xorg-lib-libICE-devel
 BuildRequires:	xorg-lib-libSM-devel
 BuildRequires:	xorg-lib-libX11-devel
@@ -107,9 +108,7 @@ Biblioteki statyczne OpenDX.
 Summary:	OpenDX documentation
 Summary(pl.UTF-8):	Dokumentacja OpenDX
 Group:		Documentation
-%if "%{_rpmversion}" >= "5"
-BuildArch:	noarch
-%endif
+%{?noarchpackage}
 
 %description doc
 Online help and html documentation for OpenDX.
@@ -121,9 +120,7 @@ Podręczna pomoc oraz dokumentacja html dla OpenDX.
 Summary:	OpenDX Examples
 Summary(pl.UTF-8):	Przykłady dla OpenDX
 Group:		Documentation
-%if "%{_rpmversion}" >= "5"
-BuildArch:	noarch
-%endif
+%{?noarchpackage}
 
 %description examples
 Examples for OpenDX.
