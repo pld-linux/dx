@@ -108,7 +108,7 @@ Biblioteki statyczne OpenDX.
 Summary:	OpenDX documentation
 Summary(pl.UTF-8):	Dokumentacja OpenDX
 Group:		Documentation
-%{?noarchpackage}
+BuildArch:	noarch
 
 %description doc
 Online help and html documentation for OpenDX.
@@ -120,7 +120,7 @@ Podręczna pomoc oraz dokumentacja html dla OpenDX.
 Summary:	OpenDX Examples
 Summary(pl.UTF-8):	Przykłady dla OpenDX
 Group:		Documentation
-%{?noarchpackage}
+BuildArch:	noarch
 
 %description examples
 Examples for OpenDX.
