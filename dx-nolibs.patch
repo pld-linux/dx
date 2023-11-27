@@ -1,6 +1,6 @@
---- dx-4.3.2/configure.ac.orig	2003-09-16 21:48:18.000000000 +0200
-+++ dx-4.3.2/configure.ac	2004-06-21 19:05:31.447745439 +0200
-@@ -535,7 +535,6 @@
+--- dx-4.4.4/configure.ac.orig	2006-08-21 23:56:08.000000000 +0200
++++ dx-4.4.4/configure.ac	2023-11-27 21:22:51.836489093 +0100
+@@ -546,7 +546,6 @@ if test "$ARCH" = "solaris" ; then
  fi
  
  dnl A couple libs for cygwin
@@ -8,7 +8,7 @@
  DX_CHECK_TGMATH
  
  dnl If buildlibdx off then pass this down to the Makefile
-@@ -546,7 +545,6 @@
+@@ -557,7 +556,6 @@ AM_CONDITIONAL(WITH_INSTALLHTML, test $w
  dnl Check for ImageMagick Libraries
  
  dnl Checks for libraries.
@@ -16,9 +16,9 @@
  AC_CHECK_LIB(dl, main)
  
  dnl Set the CXXFLAG for new keylayout
-@@ -1096,11 +1094,10 @@
- AC_CHECK_HEADERS(sstream strstream.h strstrea.h sysent.h)
- AC_CHECK_HEADERS(fstream fstream.h)
+@@ -1157,11 +1155,10 @@ AC_CHECK_HEADERS([regexp.h], [], [],
+    #define ERROR(val)  /**/
+ ])
  
 -AC_CHECK_LIB(socket, socket)
 -AC_CHECK_LIB(nsl, inet_addr)
