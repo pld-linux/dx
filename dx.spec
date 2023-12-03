@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	24
+Release:	25
 License:	IPL
 Group:		Applications/Science
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -145,6 +145,10 @@ Przykłady dla OpenDX.
 %patch11 -p1
 
 %build
+%if "%{_ver_ge '%{cxx_version}' '11.0'}" == "1"
+# lower C++ standard because C++17 std::byte conflicts with local "byte" define
+export CXXFLAGS="%{rpmcxxflags} -std=c++14"
+%endif
 %{__libtoolize}
 %{__aclocal} -I m4
 %{__autoheader}
