@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	25
+Release:	26
 License:	IPL
 Group:		Applications/Science
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -22,6 +22,7 @@ Patch8:		%{name}-gcc43.patch
 Patch9:		format-security.patch
 Patch10:	%{name}-narrowing.patch
 Patch11:	%{name}-conversion.patch
+Patch12:	%{name}-c99.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-GLU-devel
@@ -33,8 +34,8 @@ BuildRequires:	cdflib-devel
 BuildRequires:	flex
 BuildRequires:	hdf-devel
 BuildRequires:	libjpeg-devel
-BuildRequires:	libtiff-devel
 BuildRequires:	libstdc++-devel
+BuildRequires:	libtiff-devel
 BuildRequires:	libtool
 BuildRequires:	motif-devel
 BuildRequires:	netcdf-devel
@@ -132,17 +133,18 @@ Przykłady dla OpenDX.
 %prep
 %setup  -q -a 1
 #%patch0 -p1
-%patch1 -p1
-%patch2 -p0
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
+%patch -P 1 -p1
+%patch -P 2 -p0
+%patch -P 3 -p1
+%patch -P 4 -p1
+%patch -P 5 -p1
+%patch -P 6 -p1
+%patch -P 7 -p1
+%patch -P 8 -p1
+%patch -P 9 -p1
+%patch -P 10 -p1
+%patch -P 11 -p1
+%patch -P 12 -p1
 
 %build
 %if "%{_ver_ge '%{cxx_version}' '11.0'}" == "1"

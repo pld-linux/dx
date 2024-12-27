@@ -1,0 +1,187 @@
+diff --git a/src/exec/dpexec/dpparse.c b/src/exec/dpexec/dpparse.c
+index e6757309f4cf1fca..dbe6b1837f394b87 100644
+--- a/src/exec/dpexec/dpparse.c
++++ b/src/exec/dpexec/dpparse.c
+@@ -40,7 +40,7 @@
+ 
+ #define	WITHIN_EPSILON(num,of,ep)	(fabs ((num) - (of)) <= (ep))
+ 
+-int _dxf_ExNode__Delete(node *n);
++int _dxf_ExNode__Delete(void *n);
+ 
+ static PFIP
+ node_methods[] =
+@@ -91,8 +91,9 @@ void _dxf_ExPDestroyNode (node *n)
+  * added here.
+  */
+ 
+-int _dxf_ExNode__Delete(register node *n)
++int _dxf_ExNode__Delete(void *n1)
+ {
++    node	*n = n1;
+     node	*next;
+     node	*prev;
+ 
+diff --git a/src/exec/dpexec/exobject.c b/src/exec/dpexec/exobject.c
+index ae33bc859df92d8c..4b16a880950d42cb 100644
+--- a/src/exec/dpexec/exobject.c
++++ b/src/exec/dpexec/exobject.c
+@@ -316,7 +316,7 @@ int _dxf_EXO_delete (EXO_Object obj)
+ /*
+  * Default delete routine does nothing
+  */
+-int _dxf__EXO_delete (EXO_Object obj)
++int _dxf__EXO_delete (void *obj)
+ {
+     return (OK);
+ }
+diff --git a/src/exec/dpexec/exobject.h b/src/exec/dpexec/exobject.h
+index 92218baac680974e..d54ad143604de349 100644
+--- a/src/exec/dpexec/exobject.h
++++ b/src/exec/dpexec/exobject.h
+@@ -146,7 +146,7 @@ extern PFIP           _dxd_EXO_default_methods[]; /* from exobject.c */
+  * The default methods
+  */
+ 
+-int			_dxf__EXO_delete	(EXO_Object obj);
++int			_dxf__EXO_delete	(void *obj);
+ 
+ /*
+  * Generally useful external routines (for other objects)
+diff --git a/src/exec/dpexec/graph.c b/src/exec/dpexec/graph.c
+index b3e148ff4f67014b..6485832d44f66095 100644
+--- a/src/exec/dpexec/graph.c
++++ b/src/exec/dpexec/graph.c
+@@ -93,8 +93,8 @@ static void ExGraphCall (Program *p, node *n, int top, list_int *out,
+ static void ExCreateSendModules (Program *p);  
+ static void ExBuildSendModule (Program *p, gfunc *sgf, gfunc *tgf, int srcfn,
+ 			       int tgfn, int in_tab, int out_tab, int *outdex);
+-static int GvarDelete (gvar *p);
+-static int progobjDelete (progobj *p);
++static int GvarDelete (void *p);
++static int progobjDelete (void *p);
+ static void ExRemapVars(Program *p, Program *subP, int *map, int *resolved, char *fname, int inst);
+ static void ExFixAsyncVarName(Program *p,
+ 			ProgramVariable *pv, char *fname, int instance);
+@@ -323,8 +323,10 @@ _dxf_ExUndefineGvar (gvar *gv)
+  * DXDelete a gvar
+  */
+ static int
+-GvarDelete (gvar *var)
++GvarDelete (void *var1)
+ {
++    gvar *var = var1;
++
+ #if OLD_DEBUG
+     ExDebug ("*6", "DELETING:  [%08x] with cache tag 0x%08x", var, var->reccrc);
+ #endif
+@@ -343,8 +345,9 @@ GvarDelete (gvar *var)
+ }
+ 
+ static int
+-progobjDelete (progobj *var)
++progobjDelete (void *var1)
+ {
++    progobj *var = var1;
+     _dxf_ExGraphDelete (var->p);
+ 
+     return (OK);
+diff --git a/src/exec/dxmods/_compputils.h b/src/exec/dxmods/_compputils.h
+index af70bba62ae8ad64..36bd5655039380f5 100644
+--- a/src/exec/dxmods/_compputils.h
++++ b/src/exec/dxmods/_compputils.h
+@@ -29,5 +29,10 @@ PTreeNode *_dxfComputeCopyTree(PTreeNode *);
+ 
+ extern int _dxdparseError;
+ 
++union YYSTYPE;
++int _dxfcclex(union YYSTYPE *lvalp);
++int _dxfccerror(char *s);
++int _dxfcclexerror(void);
++
+ #endif /* __COMPPUTILS_H_ */
+ 
+diff --git a/src/exec/dxmods/_grid.c b/src/exec/dxmods/_grid.c
+index a8f332b90d6bd2b3..31a89ad762ed4bbf 100644
+--- a/src/exec/dxmods/_grid.c
++++ b/src/exec/dxmods/_grid.c
+@@ -404,6 +404,7 @@ static Error grid_crosshair (point, shape, density, dim, outo)
+     float		*point;
+     float		*shape;
+     int			*density;
++    int                 dim;
+     Object		*outo;
+ {
+     int			count[3];
+@@ -660,6 +661,7 @@ static Error grid_brick (point, shape, density, dim, outo)
+     float		*point;
+     float		*shape;
+     int			*density;
++    int                 dim;
+     Object		*outo;
+ {
+     int			count[3];
+@@ -944,6 +946,7 @@ static Error generate_ellipse_pos (pos, point, shape, count, dim)
+     float		*point;
+     float		*shape;
+     int			*count;
++    int                 dim;
+ {
+     double		delta;
+     int			i;
+diff --git a/src/exec/dxmods/streamline.c b/src/exec/dxmods/streamline.c
+index c498f36b6ffc3315..8490de070a12d4f3 100644
+--- a/src/exec/dxmods/streamline.c
++++ b/src/exec/dxmods/streamline.c
+@@ -1259,7 +1259,7 @@ GetElementType(Object o, char **str)
+ }
+ 
+ static Stream
+-NewStream(nDim)
++NewStream(int nDim)
+ {
+     Stream s = NULL;
+ 
+diff --git a/src/exec/libdx/lock.c b/src/exec/libdx/lock.c
+index 72c9741a2b75328a..901ba367bcadf8f6 100644
+--- a/src/exec/libdx/lock.c
++++ b/src/exec/libdx/lock.c
+@@ -936,7 +936,7 @@ DXunlock(lock_type *l, int who)
+     if (_lock->knt == 0)
+     {
+         DXSetError(ERROR_INTERNAL, "Unlocking an unlocked lock?");
+-	return;
++	return ERROR;
+     }
+ 
+     /*
+diff --git a/src/uipp/dxuilib/Parse.h b/src/uipp/dxuilib/Parse.h
+index 373900ee666d0417..2c4e9292fadb357f 100644
+--- a/src/uipp/dxuilib/Parse.h
++++ b/src/uipp/dxuilib/Parse.h
+@@ -64,6 +64,9 @@ void ParseEndOfMacroDefinition();
+ extern
+ void yyerror(char *, ...);
+ 
++extern
++int yylex(void);
++
+ #if defined(__cplusplus) || defined(c_plusplus)
+ }
+ #endif
+diff --git a/src/uipp/widgets/MultiText.c b/src/uipp/widgets/MultiText.c
+index 9591aea16c1e847d..ad1ae1603794c45d 100644
+--- a/src/uipp/widgets/MultiText.c
++++ b/src/uipp/widgets/MultiText.c
+@@ -646,11 +646,6 @@ StringToFloatConverter(XrmValue* args,
+ static void
+ ClassInitialize(WidgetClass wc)
+ {
+-#ifdef	intelnt /* Exceed on WINDOWS NT has _XmRegisterConverters()   */
+-    _XmRegisterConverters();
+-#else
+-    XmRegisterConverters();
+-#endif
+     XtAddConverter(XmRString, XmRFloat, StringToFloatConverter, NULL, 0);
+ }
+ 
