@@ -132,7 +132,7 @@ Przykłady dla OpenDX.
 
 %prep
 %setup  -q -a 1
-#%patch0 -p1
+#%%patch0 -p1
 %patch -P 1 -p1
 %patch -P 2 -p0
 %patch -P 3 -p1
