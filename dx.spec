@@ -2,7 +2,7 @@ Summary:	Excellent tool for making visualization of data
 Summary(pl.UTF-8):	Doskonałe narzędzie do wizualizacji danych
 Name:		dx
 Version:	4.4.4
-Release:	26
+Release:	27
 License:	IPL
 Group:		Applications/Science
 Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
@@ -10,7 +10,6 @@ Source0:	http://opendx.npaci.edu/source/%{name}-%{version}.tar.gz
 Source1:	http://opendx.npaci.edu/source/%{name}samples-4.4.0.tar.gz
 # Source1-md5:	e8f43722ca0a66282608bded7c0e4f93
 Source2:	%{name}.desktop
-Patch0:		%{name}-DESTDIR.patch
 Patch1:		%{name}-nolibs.patch
 Patch2:		%{name}samples-DESTDIR.patch
 Patch3:		%{name}samples-unused_bin.patch
@@ -132,7 +131,6 @@ Przykłady dla OpenDX.
 
 %prep
 %setup  -q -a 1
-#%%patch0 -p1
 %patch -P 1 -p1
 %patch -P 2 -p0
 %patch -P 3 -p1
@@ -229,11 +227,21 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/dx
 %dir %{_libdir}/dx/bin_linux
 %attr(755,root,root) %{_libdir}/dx/bin_linux/*
-%attr(755,root,root) %{_libdir}/dx/libDX*.so.*
+%attr(755,root,root) %{_libdir}/dx/libDX.so.*.*.*
+%{_libdir}/dx/libDX.so.4
+%attr(755,root,root) %{_libdir}/dx/libDXL.so.*.*.*
+%{_libdir}/dx/libDXL.so.4
+%attr(755,root,root) %{_libdir}/dx/libDXcallm.so.*.*.*
+%{_libdir}/dx/libDXcallm.so.4
+%attr(755,root,root) %{_libdir}/dx/libDXlite.so.*.*.*
+%{_libdir}/dx/libDXlite.so.4
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/dx/libDX*.so
+%{_libdir}/dx/libDX.so
+%{_libdir}/dx/libDXL.so
+%{_libdir}/dx/libDXcallm.so
+%{_libdir}/dx/libDXlite.so
 %{_includedir}/dx
 %{_includedir}/dxconfig.h
 %{_includedir}/dxl.h
