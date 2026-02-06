@@ -22,6 +22,7 @@ Patch9:		format-security.patch
 Patch10:	%{name}-narrowing.patch
 Patch11:	%{name}-conversion.patch
 Patch12:	%{name}-c99.patch
+Patch13:	%{name}-types.patch
 URL:		http://www.opendx.org/
 BuildRequires:	ImageMagick-devel >= 1:6.2.4.0
 BuildRequires:	OpenGL-GLU-devel
@@ -143,6 +144,7 @@ Przykłady dla OpenDX.
 %patch -P 10 -p1
 %patch -P 11 -p1
 %patch -P 12 -p1
+%patch -P 13 -p1
 
 %build
 %if "%{_ver_ge '%{cxx_version}' '11.0'}" == "1"
