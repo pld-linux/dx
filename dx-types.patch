@@ -1,0 +1,2618 @@
+--- dx-4.4.4/include/dx/hash.h.orig	2000-08-24 17:03:22.000000000 +0200
++++ dx-4.4.4/include/dx/hash.h	2026-02-01 15:53:22.504174809 +0100
+@@ -70,7 +70,7 @@ typedef Pointer 	  Key;
+ typedef Pointer 	  Element;
+ 
+ HashTable DXCreateHash(int elementSize, 
+-		PseudoKey (*DXhashFunc)(), int (*DXcmpFunc)());
++		PseudoKey (*DXhashFunc)(Key), int (*DXcmpFunc)(Key, Element));
+ /**
+ \index{DXCreateHash}
+ Creates a hash table storing elements (key + data) of size {\tt elementSize}.
+--- dx-4.4.4/src/exec/libdx/client.c.orig	2005-12-30 21:39:16.000000000 +0100
++++ dx-4.4.4/src/exec/libdx/client.c	2026-02-01 15:43:16.867571182 +0100
+@@ -136,9 +136,6 @@ int DXConnectToServer(char *host, int pp
+ #endif
+     struct hostent *hp;
+     int length;
+-#ifndef DXD_HAS_WINSOCKETS
+-    struct hostent *gethostbyname();
+-#endif
+     ushort port = pport;
+ 
+ #if DXD_SOCKET_UNIXDOMAIN_OK
+--- dx-4.4.4/src/exec/libdx/hash.c.orig	2005-12-26 18:19:33.000000000 +0100
++++ dx-4.4.4/src/exec/libdx/hash.c	2026-02-01 15:52:58.934047537 +0100
+@@ -108,8 +108,8 @@ struct hashTable
+     int getNextPage;
+     int getNextElement;
+ 
+-    PseudoKey ( *hash ) ();
+-    int ( *cmp ) ();
++    PseudoKey ( *hash ) (Key);
++    int ( *cmp ) (Key, Element);
+ 
+ #ifdef STATS
+     int nInserts, nCollisions;
+@@ -168,7 +168,7 @@ static void _freeElement( PageTable *, H
+ 
+ 
+ HashTable
+-DXCreateHash( int dataSize, PseudoKey ( *hash ) (), int ( *cmp ) () )
++DXCreateHash( int dataSize, PseudoKey ( *hash ) (Key), int ( *cmp ) (Key, Element) )
+ {
+     HashTable hashTable;
+ 
+@@ -271,7 +271,7 @@ DXInsertHashElement( HashTable hashTable
+ {
+     PseudoKey pseudoKey;
+     int status;
+-    PseudoKey ( *hash ) ();
++    PseudoKey ( *hash ) (Key);
+ 
+ #ifdef STATS
+     hashTable->nInserts ++;
+@@ -374,8 +374,8 @@ _QueryHashElement( HashTable hashTable,
+     Leaf leaf;
+     int slot, start, found;
+     HashElement element;
+-    PseudoKey ( *hash ) ();
+-    int ( *cmp ) ();
++    PseudoKey ( *hash ) (Key);
++    int ( *cmp ) (Key, Element);
+ 
+     cmp = hashTable->cmp;
+     hash = hashTable->hash;
+@@ -652,7 +652,7 @@ _InsertHashLeaf( HashTable hashTable, Ps
+     int slot, start;
+     int found;
+     HashElement element;
+-    int ( *cmp ) ();
++    int ( *cmp ) (Key, Element);
+ 
+     cmp = hashTable->cmp;
+     start = LEAF_INDEX( pseudoKey );
+--- dx-4.4.4/src/exec/libdx/lbextract.c.orig	2003-07-12 02:12:09.000000000 +0200
++++ dx-4.4.4/src/exec/libdx/lbextract.c	2026-02-01 16:04:14.021027679 +0100
+@@ -188,9 +188,10 @@ CONVTYPE(uint, double)
+ CONVTYPE(float, double)
+ 
+ 
++typedef Error (*ConvFunc)(int, void *, void *);
+ struct convtable {
+     int conversion;                        /* convert flags */
+-    Error (*convfunc)();                   /* convert routine */
++    ConvFunc convfunc;                     /* convert routine */
+                      /* parms are: (int count, Pointer from, Pointer to); */
+     int hascommon;                         /* has common representation? */
+     Type commontype;                       /* smallest common representation */
+@@ -268,27 +269,27 @@ static struct convtable typetable[NUM_TY
+  /* from BYTE */			                           /* to ... */ 
+  { { CONV_EQUAL,      NULL,   	    HAS_COMMON,     TYPE_BYTE },     /* BYTE */
+    { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* UBYTE */
+-   { CONV_ALLOWED,    byte2short,   HAS_COMMON,     TYPE_SHORT },    /* SHORT */
++   { CONV_ALLOWED,    (ConvFunc)byte2short,   HAS_COMMON,     TYPE_SHORT },    /* SHORT */
+    { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* USHORT */
+-   { CONV_ALLOWED,    byte2int,     HAS_COMMON,     TYPE_INT },      /* INT */
++   { CONV_ALLOWED,    (ConvFunc)byte2int,     HAS_COMMON,     TYPE_INT },      /* INT */
+    { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* UINT */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_HYPER },    /* HYPER */
+    { CONV_NOTIMPL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* UHYPER */
+-   { CONV_ALLOWED,    byte2float,   HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
+-   { CONV_ALLOWED,    byte2double,  HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
++   { CONV_ALLOWED,    (ConvFunc)byte2float,   HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
++   { CONV_ALLOWED,    (ConvFunc)byte2double,  HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
+    { CONV_NOTIMPL,    NULL, 	    HAS_COMMON,     TYPE_XXXX },  }, /* LDOUBLE */
+ 
+  /* from UBYTE */			                           /* to ... */ 
+  { { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* BYTE */
+    { CONV_EQUAL,	    NULL,   	    HAS_COMMON,     TYPE_UBYTE },    /* UBYTE */
+-   { CONV_ALLOWED,    ubyte2short,    HAS_COMMON,     TYPE_SHORT },    /* SHORT */
+-   { CONV_ALLOWED,    ubyte2ushort,   HAS_COMMON,     TYPE_USHORT },   /* USHORT */
+-   { CONV_ALLOWED,    ubyte2int,      HAS_COMMON,     TYPE_INT },      /* INT */
+-   { CONV_ALLOWED,    ubyte2uint,     HAS_COMMON,     TYPE_UINT },     /* UINT */
++   { CONV_ALLOWED,    (ConvFunc)ubyte2short,    HAS_COMMON,     TYPE_SHORT },    /* SHORT */
++   { CONV_ALLOWED,    (ConvFunc)ubyte2ushort,   HAS_COMMON,     TYPE_USHORT },   /* USHORT */
++   { CONV_ALLOWED,    (ConvFunc)ubyte2int,      HAS_COMMON,     TYPE_INT },      /* INT */
++   { CONV_ALLOWED,    (ConvFunc)ubyte2uint,     HAS_COMMON,     TYPE_UINT },     /* UINT */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_HYPER },    /* HYPER */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_XXXX },     /* UHYPER */
+-   { CONV_ALLOWED,    ubyte2float,    HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
+-   { CONV_ALLOWED,    ubyte2double,   HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
++   { CONV_ALLOWED,    (ConvFunc)ubyte2float,    HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
++   { CONV_ALLOWED,    (ConvFunc)ubyte2double,   HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
+    { CONV_NOTIMPL,    NULL, 	    HAS_COMMON,     TYPE_XXXX },  }, /* LDOUBLE */
+ 
+  /* from SHORT */			                           /* to ... */ 
+@@ -296,12 +297,12 @@ static struct convtable typetable[NUM_TY
+    { CONV_ILLEGAL,    NULL,  	    HAS_COMMON,     TYPE_SHORT },    /* UBYTE */
+    { CONV_EQUAL,	    NULL,   	    HAS_COMMON,     TYPE_SHORT },    /* SHORT */
+    { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* USHORT */
+-   { CONV_ALLOWED,    short2int,      HAS_COMMON,     TYPE_INT },      /* INT */
++   { CONV_ALLOWED,    (ConvFunc)short2int,      HAS_COMMON,     TYPE_INT },      /* INT */
+    { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* UINT */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_HYPER },    /* HYPER */
+    { CONV_NOTIMPL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* UHYPER */
+-   { CONV_ALLOWED,    short2float,    HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
+-   { CONV_ALLOWED,    short2double,   HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
++   { CONV_ALLOWED,    (ConvFunc)short2float,    HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
++   { CONV_ALLOWED,    (ConvFunc)short2double,   HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
+    { CONV_NOTIMPL,    NULL, 	    HAS_COMMON,     TYPE_XXXX },  }, /* LDOUBLE */
+ 
+  /* from USHORT */			                           /* to ... */ 
+@@ -309,12 +310,12 @@ static struct convtable typetable[NUM_TY
+    { CONV_ILLEGAL,    NULL,  	    HAS_COMMON,     TYPE_USHORT },   /* UBYTE */
+    { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* SHORT */
+    { CONV_EQUAL,	    NULL,   	    HAS_COMMON,     TYPE_USHORT },   /* USHORT */
+-   { CONV_ALLOWED,    ushort2int,     HAS_COMMON,     TYPE_INT },      /* INT */
+-   { CONV_ALLOWED,    ushort2uint,    HAS_COMMON,     TYPE_UINT },     /* UINT */
++   { CONV_ALLOWED,    (ConvFunc)ushort2int,     HAS_COMMON,     TYPE_INT },      /* INT */
++   { CONV_ALLOWED,    (ConvFunc)ushort2uint,    HAS_COMMON,     TYPE_UINT },     /* UINT */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_HYPER },    /* HYPER */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_XXXX },     /* UHYPER */
+-   { CONV_ALLOWED,    ushort2float,   HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
+-   { CONV_ALLOWED,    ushort2double,  HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
++   { CONV_ALLOWED,    (ConvFunc)ushort2float,   HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
++   { CONV_ALLOWED,    (ConvFunc)ushort2double,  HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
+    { CONV_NOTIMPL,    NULL, 	    HAS_COMMON,     TYPE_XXXX }, },  /* LDOUBLE */
+ 
+  /* from INT */			                                   /* to ... */ 
+@@ -326,8 +327,8 @@ static struct convtable typetable[NUM_TY
+    { CONV_ILLEGAL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* UINT */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_HYPER },    /* HYPER */
+    { CONV_NOTIMPL,    NULL,  	     NO_COMMON,     TYPE_BYTE },     /* UHYPER */
+-   { CONV_ALLOWED,    int2float,      HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
+-   { CONV_ALLOWED,    int2double,     HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
++   { CONV_ALLOWED,    (ConvFunc)int2float,      HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
++   { CONV_ALLOWED,    (ConvFunc)int2double,     HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
+    { CONV_NOTIMPL,    NULL,	    HAS_COMMON,     TYPE_XXXX },  }, /* LDOUBLE */
+ 
+  /* from UINT */			                           /* to ... */ 
+@@ -339,8 +340,8 @@ static struct convtable typetable[NUM_TY
+    { CONV_EQUAL,	    NULL,   	    HAS_COMMON,     TYPE_UINT },     /* UINT */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_HYPER },    /* HYPER */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_XXXX },     /* UHYPER */
+-   { CONV_ALLOWED,    uint2float,     HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
+-   { CONV_ALLOWED,    uint2double,    HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
++   { CONV_ALLOWED,    (ConvFunc)uint2float,     HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
++   { CONV_ALLOWED,    (ConvFunc)uint2double,    HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
+    { CONV_NOTIMPL,    NULL, 	    HAS_COMMON,     TYPE_XXXX }, },  /* LDOUBLE */
+ 
+  /* from HYPER */			                           /* to ... */ 
+@@ -379,7 +380,7 @@ static struct convtable typetable[NUM_TY
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_FLOAT },    /* HYPER */
+    { CONV_NOTIMPL,    NULL,  	    HAS_COMMON,     TYPE_FLOAT },    /* UHYPER */
+    { CONV_EQUAL,	    NULL,  	    HAS_COMMON,     TYPE_FLOAT },    /* FLOAT */
+-   { CONV_ALLOWED,    float2double,   HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
++   { CONV_ALLOWED,    (ConvFunc)float2double,   HAS_COMMON,     TYPE_DOUBLE },   /* DOUBLE */
+    { CONV_NOTIMPL,    NULL, 	    HAS_COMMON,     TYPE_XXXX },  }, /* LDOUBLE */
+ 
+  /* from DOUBLE */			                           /* to ... */ 
+--- dx-4.4.4/src/exec/libdx/lbtask.c.orig	2006-01-05 23:55:48.000000000 +0100
++++ dx-4.4.4/src/exec/libdx/lbtask.c	2026-02-01 16:06:14.805013702 +0100
+@@ -52,7 +52,7 @@
+ #define HZ 100
+ #endif
+ 
+-typedef Error                   (*PFE)();
++typedef Error                   (*PFE)(Pointer);
+ 
+ /*
+  * Task tracing
+@@ -467,7 +467,7 @@ DXAbortTaskGroup(void)
+  */
+ 
+ Error
+-_dxf_ExRunOn(int pid, Error (*func)(), Pointer arg, int size)
++_dxf_ExRunOn(int pid, Error (*func)(Pointer), Pointer arg, int size)
+ {
+     DXCreateTaskGroup();
+     DXAddTask(func, arg, size, 1.0);
+@@ -475,7 +475,7 @@ _dxf_ExRunOn(int pid, Error (*func)(), P
+ }
+ 
+ Error
+-_dxf_ExRunOnAll(Error (*func)(), Pointer arg, int size)
++_dxf_ExRunOnAll(Error (*func)(Pointer), Pointer arg, int size)
+ {
+     int i;
+ 
+--- dx-4.4.4/src/exec/libdx/outglue.c.orig	2006-01-05 23:55:49.000000000 +0100
++++ dx-4.4.4/src/exec/libdx/outglue.c	2026-02-01 16:29:56.709358791 +0100
+@@ -40,9 +40,6 @@
+ #include <sys/filio.h>
+ #endif
+ 
+-typedef Error (*PFE)();
+-typedef int (*PFI)();
+-
+ #if DXD_NEEDS_SYS_SELECT_H
+ #include <sys/select.h>
+ #endif
+@@ -54,10 +51,10 @@ typedef int (*PFI)();
+ #define FALSE 0
+ #endif
+ 
+-Error _dxf_RegisterInputHandler (PFE proc, int fd, Pointer arg);
++Error _dxf_RegisterInputHandler (Error (*proc)(int, Pointer), int fd, Pointer arg);
+ 
+ int _dxd_exOutboard = FALSE;
+-PFE _dxd_registerIHProc = _dxf_RegisterInputHandler;
++Error(*_dxd_registerIHProc)(Error (*)(int, Pointer), int, Pointer) = _dxf_RegisterInputHandler;
+ 
+ extern Object _dxfExportBin_FP(Object o, int fd);
+ extern Object _dxfImportBin_FP(int fd);
+@@ -188,7 +185,7 @@ Error datafromhost (int dxfd, Pointer ar
+ }
+ 
+ 
+-Error DXCallOutboard (PFE m, int dxfd)
++Error DXCallOutboard (Error (*m)(Object *, Object *), int dxfd)
+ {
+     static int  firsttime = 1;
+     Array	oarr;
+@@ -246,7 +243,7 @@ Error DXCallOutboard (PFE m, int dxfd)
+     count = 3;
+     for (i=0; i<nin; i++) 
+     {
+-	if (iptr[i] == (int)NULL)
++	if (iptr[i] == 0)
+ 	    continue;
+ 
+ 	ilist[i] = DXGetEnumeratedMember(iobj, count++, NULL);
+@@ -434,7 +431,7 @@ Error DXGetInputs(Object *in, int dxfd)
+     count = 3;
+     for (i=0; i<nin; i++) 
+     {
+-	if (iptr[i] == (int)NULL)
++	if (iptr[i] == 0)
+ 	    continue;
+ 
+ 	in[i] = DXGetEnumeratedMember(iobj, count++, NULL);
+@@ -587,8 +584,8 @@ finish_up:
+ 
+ typedef struct
+ {
+-    PFE		proc;
+-    PFI		check;
++    Error (*proc)(int, Pointer);
++    int (*check)(int, Pointer);
+     int 	flag;
+     int		fd;
+     Pointer	arg;
+--- dx-4.4.4/src/exec/libdx/notify.c.orig	2005-12-30 21:41:01.000000000 +0100
++++ dx-4.4.4/src/exec/libdx/notify.c	2026-02-01 16:31:47.229955358 +0100
+@@ -85,7 +85,7 @@ delete_table(Pointer p)
+ }
+ 
+ static PseudoKey
+-hash(Entry key)
++hash(Key key)
+ {
+     char *name = ((struct _entry *) key)->name;
+     long l, i, s=0;
+@@ -94,7 +94,7 @@ hash(Entry key)
+ }
+ 
+ static int
+-cmp(Entry k0, Entry k1)
++cmp(Key k0, Element k1)
+ {
+     char *n0 = ((struct _entry *) k0)->name;
+     char *n1 = ((struct _entry *) k1)->name;
+--- dx-4.4.4/src/exec/libdx/class.awk.orig	2000-06-12 07:45:26.000000000 +0200
++++ dx-4.4.4/src/exec/libdx/class.awk	2026-02-01 18:39:57.981263964 +0100
+@@ -155,7 +155,10 @@ BEGIN {
+ 	#
+         method = $i
+         n = method_number[class method]
+-        class_vector[class n] = "_dxf" class "_" method
++        cast = "(" returns[method] " (*)(" argtype[method 0]
++        for (k=1; k< nargs[method]; k++) cast = cast ", " argtype[method k]
++        cast = cast "))"
++        class_vector[class n] = cast "_dxf" class "_" method
+ 
+         if (do_h) {
+ 	    #
+@@ -275,6 +278,8 @@ END {
+             for (j=f; j<nv; j++) {
+                 method = method_name[class j]
+                 printf("    %s (*%s)(", returns[method], method)
++                printf("%s", argtype[method 0])
++                for (k=1; k<nargs[method]; k++) printf(",%s", argtype[method k]);
+                 printf(");\n")
+             }
+             printf("};\n")
+--- dx-4.4.4/src/exec/libdx/local.mk.in.orig	2003-07-12 02:12:11.000000000 +0200
++++ dx-4.4.4/src/exec/libdx/local.mk.in	2026-02-01 19:00:43.734599158 +0100
+@@ -8,7 +8,7 @@
+ 
+ buffer.c: ${srcdir}/buffer.Z
+ 	sed -e 's/[ 	][ 	]*\$$/ $$/' ${srcdir}/buffer.Z > __buffer.c
+-	@CPP@ __buffer.c | tr -s "\044" "\012" | sed   -e '/^#/d' -e 's/INCLUDE2/#include/' -e 's/^pragma/#pragma/'  > buffer.c
++	@CPP@ -DNeedFunctionPrototypes=1 __buffer.c | tr -s "\044" "\012" | sed   -e '/^#/d' -e 's/INCLUDE2/#include/' -e 's/^pragma/#pragma/'  > buffer.c
+ 	rm -f __buffer.c
+ 
+ lbshade.c: ${srcdir}/lbshade.Z
+--- dx-4.4.4/src/exec/libdx/buffer.Z.orig	2006-01-05 23:55:46.000000000 +0100
++++ dx-4.4.4/src/exec/libdx/buffer.Z	2026-02-01 19:09:58.737573474 +0100
+@@ -139,6 +139,7 @@ _dxf_InitBuffer(struct buffer *b, enum p
+ }
+ 
+ 
++typedef struct _XDisplay Display;
+ extern int XImageByteOrder(
+ #if NeedFunctionPrototypes
+    Display*		/* display */
+--- dx-4.4.4/src/exec/libdx/fieldinterp.c.orig	2003-07-12 02:12:09.000000000 +0200
++++ dx-4.4.4/src/exec/libdx/fieldinterp.c	2026-02-01 19:18:38.717027476 +0100
+@@ -16,8 +16,8 @@
+ #include "dx/dx.h"
+ #include "fieldinterpClass.h"
+ 
+-typedef int          	  (*PFI)();
+-typedef FieldInterpolator (*PFFI)();
++typedef int          	  (*PFI)(Field);
++typedef FieldInterpolator (*PFFI)(Field, enum interp_init, double, Matrix *);
+ 
+ int	_dxfRecognizeTetras(Field);
+ PFFI	_dxfNewTetrasInterpolator(Field, enum interp_init, double, Matrix *);
+--- dx-4.4.4/src/exec/libdx/callm_xinit.c.orig	2000-06-12 07:45:26.000000000 +0200
++++ dx-4.4.4/src/exec/libdx/callm_xinit.c	2026-02-01 19:22:54.565065610 +0100
+@@ -20,9 +20,9 @@ typedef Error (*PFE)();
+ #undef String
+ #undef Screen
+ 
+-extern PFE _dxd_registerIHProc;
++extern Error (*_dxd_registerIHProc)(Error (*)(int, Pointer), int, Pointer);
+ static XtAppContext appcontext = NULL;
+-Error _dxf_RegisterInputHandlerX(PFE func, int fd, Pointer arg);
++Error _dxf_RegisterInputHandlerX(Error (*func)(int, Pointer), int fd, Pointer arg);
+ 
+ void DXInitializeXMainLoop(XtAppContext app)
+ {
+--- dx-4.4.4/src/exec/libdx/memory.c.orig	2026-02-01 19:10:13.960988411 +0100
++++ dx-4.4.4/src/exec/libdx/memory.c	2026-02-01 19:32:36.014840890 +0100
+@@ -1869,8 +1869,8 @@ Error DXTraceAlloc(int t)
+ /* executive routines - currently internal entry points.  these should
+  *  be formalized and exposed as part of libdx
+  */
+-extern Error _dxf_ExRunOn(int pid, Error (*func)(), Pointer arg, int size);
+-extern Error _dxf_ExRunOnAll(Error (*func)(), Pointer arg, int size);
++extern Error _dxf_ExRunOn(int pid, Error (*func)(Pointer), Pointer arg, int size);
++extern Error _dxf_ExRunOnAll(Error (*func)(Pointer), Pointer arg, int size);
+ 
+ 
+ /*
+@@ -2028,11 +2028,11 @@ DXPrintLocalAlloc(int which, int how)
+ 
+     /* arrange to run on correct processor here */
+     if (which < 0) {
+-	_dxf_ExRunOnAll(aprint_local_wrapper, &how, sizeof(int));
++	_dxf_ExRunOnAll((Error(*)(Pointer))aprint_local_wrapper, &how, sizeof(int));
+ 	return;
+     }
+ 
+-    _dxf_ExRunOn(which+1, aprint_local_wrapper, &how, sizeof(int));
++    _dxf_ExRunOn(which+1, (Error(*)(Pointer))aprint_local_wrapper, &how, sizeof(int));
+ }
+ 
+ 
+--- dx-4.4.4/src/exec/dxmods/fourier.c.orig	2006-01-03 18:02:22.000000000 +0100
++++ dx-4.4.4/src/exec/dxmods/fourier.c	2026-02-01 20:19:39.386633596 +0100
+@@ -111,30 +111,30 @@ static Error W4 (WorkerData *arg, int id
+ 
+ static Error W5 (XFData *arg, int id);
+ 
+-static void fft_trig (/*t, logn, inv*/);
++static void fft_trig (complex_t *, int, int);
+ #if 0
+     register complex_t	*t;
+     register int	logn;
+     register int	inv;
+ #endif
+-static void fft_brev (/*b, logn*/);
++static void fft_brev (int *, int);
+ #if 0
+     register int	*b;
+     register int	logn;
+ #endif
+-static void fft (/*c, logn, trig, brev*/);
++static void fft (complex_t *, int, complex_t *, int *);
+ #if 0
+     register complex_t	*c;
+     register int	logn;
+     register complex_t	*trig;
+     register int	*brev;
+ #endif
+-static void fft_norm (/*c, logn*/);
++static void fft_norm (complex_t *, int);
+ #if 0
+     register complex_t	*c;
+     register int	logn;
+ #endif
+-static void dft (/*n, from, to, inv*/);
++static void dft (int, complex_t *, complex_t *, int);
+ #if 0
+     int			n;
+     register complex_t	*from;
+@@ -843,7 +843,7 @@ W5 (XFData *arg, int id)
+     if (logs != -1)
+     {
+ 	fft_brev (brev, logs);
+-	fft_trig (trig, logs, larg.args.inverse);
++	fft_trig ((complex_t *)trig, logs, larg.args.inverse);
+     }
+ 
+     for (i = id; i < n; i += larg.procs)
+@@ -876,13 +876,13 @@ W5 (XFData *arg, int id)
+ 
+ 	if (logs != -1)
+ 	{
+-	    fft (data, logs, trig, brev);
++	    fft ((complex_t *)data, logs, (complex_t *)trig, brev);
+ 	    if (larg.args.inverse)
+-		fft_norm (data, logs);
++		fft_norm ((complex_t *)data, logs);
+ 	}
+ 	else
+ 	{
+-	    dft (s, data, trig, larg.args.inverse);
++	    dft (s, (complex_t *)data, (complex_t *)trig, larg.args.inverse);
+ 	}
+ 
+ 	if (larg.dim == 2 && larg.args.center && larg.args.inverse)
+--- dx-4.4.4/src/exec/dxmods/maptoplane.c.orig	2003-07-12 02:12:06.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/maptoplane.c	2026-02-01 20:20:33.570257764 +0100
+@@ -38,7 +38,7 @@ END:
+ #include "bounds.h"
+ #include "vectors.h"
+ 
+-static Error map_normal ();
++static Error map_normal (float *, Object);
+ 
+ int m_MapToPlane (in, out)
+     Object		*in;
+--- dx-4.4.4/src/exec/dxmods/measure.c.orig	2005-12-31 00:02:32.000000000 +0100
++++ dx-4.4.4/src/exec/dxmods/measure.c	2026-02-01 21:17:06.868457698 +0100
+@@ -133,8 +133,9 @@ DXMeasure(Object object, char *what)
+ 
+ }
+ 
+-typedef float (*PFF)();
+-typedef Error (*PFE)();
++typedef Error (*PFE)(Object, Segments *, float *);
++typedef Error (*FieldMethod)(Field, Segments *, float *);
++typedef Error (*CFieldMethod)(int, Segments *, float *);
+ 
+ typedef struct
+ {
+@@ -169,8 +170,8 @@ typedef struct
+ {
+     char *etype;
+     int  what;
+-    PFE  fMethod;
+-    PFE  cfMethod;
++    FieldMethod fMethod;
++    CFieldMethod cfMethod;
+     int  growFlag;
+ } MethodTableEntry;
+ 
+@@ -197,7 +198,7 @@ static MethodTableEntry methodTable[] =
+ };
+ 
+ static Error
+-GetMethods(Object o, int what, PFE *fieldMethod, PFE *cfieldMethod, int *gFlag)
++GetMethods(Object o, int what, FieldMethod *fieldMethod, CFieldMethod *cfieldMethod, int *gFlag)
+ {
+     Class class = DXGetObjectClass(o);
+     if (class == CLASS_GROUP)
+@@ -325,7 +326,7 @@ MeasureObject(Object object, int what)
+     {
+ 	case CLASS_FIELD:
+ 	{
+-	    PFE task;
++	    FieldMethod task;
+ 
+ 	    if (DXEmptyField((Field)workCopy))
+ 	    {
+@@ -390,7 +391,8 @@ MeasureObject(Object object, int what)
+ 	    MeasureTaskArgs args;
+ 	    Object child;
+ 	    int i;
+-	    PFE ftask, ctask;
++	    FieldMethod ftask;
++	    CFieldMethod ctask;
+ 	    int growFlag;
+ 
+ 	    if (! GetMethods(workCopy, what, &ftask, &ctask, &growFlag))
+@@ -432,7 +434,7 @@ MeasureObject(Object object, int what)
+ 		    args.what     = what;
+ 		    args.measure  = measureTable + i;
+ 		    args.segs     = segments + i;
+-		    args.task     = ftask;
++		    args.task     = (PFE)ftask;
+ 		
+ 		    if (! DXAddTask(MeasureTask,(Pointer)&args, sizeof(args), 1.0))
+ 		    {
+@@ -2473,7 +2475,7 @@ MeasureElements_Field(Field f)
+     Array       pA, cA, dA = NULL;
+     int         pd, nm;
+     ArrayHandle pH = NULL, cH = NULL;
+-    PFE		mth;
++    Error       (*mth)(ArrayHandle, ArrayHandle, float *, int);
+     dependency  dep;
+ 
+     pA = (Array)DXGetComponentValue(f, "positions");
+--- dx-4.4.4/src/exec/dxmods/partition.c.orig	2005-12-31 00:03:17.000000000 +0100
++++ dx-4.4.4/src/exec/dxmods/partition.c	2026-02-01 21:18:30.132237275 +0100
+@@ -14,7 +14,7 @@
+ #include <string.h>
+ #endif
+ 
+-extern void _dxfPermute(); /* from libdx/permute.c */
++extern void _dxfPermute(int, unsigned char *, int *, int *, int, unsigned char *, int *); /* from libdx/permute.c */
+ Object DXObjectPartition(Object, int, int); 
+ 
+ /* default number of partitions if number of processors > 1
+--- dx-4.4.4/src/exec/dxmods/ribbon.c.orig	2000-08-24 22:04:46.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/ribbon.c	2026-02-01 21:19:56.282698989 +0100
+@@ -17,7 +17,7 @@
+ #include <math.h>
+ #include <dx/dx.h>
+ 
+-static Error ribbon_width ();
++static Error ribbon_width (Object, float *);
+ 
+ int m_Ribbon (in, out)
+     Object	*in;
+--- dx-4.4.4/src/exec/dxmods/_getfield.h.orig	2001-04-06 18:59:15.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/_getfield.h	2026-02-01 21:22:20.306804204 +0100
+@@ -86,8 +86,9 @@ typedef struct  _attribute_info
+ 
+ 
+ /* ------------------------------------------------------------------------- */
+-typedef struct  _array_info
+-{
++typedef struct  _array_info *array_info;
++
++struct _array_info {
+     /*
+      * array base class
+      *
+@@ -114,14 +115,13 @@ typedef struct  _array_info
+     Pointer   data;           /* DXGetArrayData */
+     int       itemsize;       /* DXGetItemSize  */
+     int       original_items; /* DXQueryOriginalSizes (from DXGrow) */
+-    Error     (*get_item) (); /* ( int, array_info, Pointer ); */
++    Error     (*get_item) (int, array_info, Pointer);
+     ArrayHandle  handle;      /* DXCreateArrayHandle */
+               /* requires component 'class' information to work */
+ #if 0
+     Pointer   data_local;     /* DXGetArrayDataLocal */
+ #endif
+-}
+-*array_info;
++};
+ 
+ 
+ /* ------------------------------------------------------------------------- */
+--- dx-4.4.4/src/exec/dxmods/showboundary.c.orig	2006-07-06 00:56:37.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/showboundary.c	2026-02-01 21:32:59.150231396 +0100
+@@ -1669,6 +1669,8 @@ MultiGrid regular_boundary ( field_info
+ 
+ 
+ 
++typedef Error (*NeighborFunc)(int, array_info, mesh_bounds, int *);
++
+ static
+ Field irregular_boundary
+          ( field_info input_info, InvalidComponentHandle i_handle )
+@@ -1692,7 +1694,7 @@ Field irregular_boundary
+ 
+     int flip=0;
+ 
+-    Error (*get_neighbor)() = NULL;
++    NeighborFunc get_neighbor;
+ 
+     /* duplicated out of _helper_jea.h */
+ 
+@@ -1746,8 +1748,8 @@ Field irregular_boundary
+ 
+         switch ( input_info->std_comps[(int)CONNECTIONS]->element_type )
+         {
+-          case QUADRILATERALS: get_neighbor = _dxf_get_neighb_grid_QUADS; break;
+-          case CUBES:          get_neighbor = _dxf_get_neighb_grid_CUBES; break;
++          case QUADRILATERALS: get_neighbor = (NeighborFunc)_dxf_get_neighb_grid_QUADS; break;
++          case CUBES:          get_neighbor = (NeighborFunc)_dxf_get_neighb_grid_CUBES; break;
+ 	  default: break;
+         }
+     }
+@@ -1785,7 +1787,7 @@ Field irregular_boundary
+     else \
+         for ( i=0; i<c_info->items; i++ ) \
+             if ( !DXIsElementInvalid ( i_handle, i ) ) { \
+-                if ( !get_neighbor ( i, c_info, bptr, &neighb ) ) \
++                if ( !get_neighbor ( i, c_info, (mesh_bounds)bptr, (int *)&neighb ) ) \
+                     goto error;\
+                 else \
+                     for ( j=0; j<N_NEIGHB; j++ ) \
+@@ -1912,7 +1914,7 @@ nC_out,k,((int *) data) [nC_out*N_CONN_O
+     } else { \
+         for ( i=0; i<c_info->items; i++ ) \
+             if ( !DXIsElementInvalid ( i_handle, i ) ) { \
+-                if ( !get_neighbor ( i, c_info, bptr, &neighb ) ) \
++                if ( !get_neighbor ( i, c_info, (mesh_bounds)bptr, (int *)&neighb ) ) \
+                     goto error; \
+                 else \
+                     for ( j=0; j<N_NEIGHB; j++ ) \
+--- dx-4.4.4/src/exec/dxmods/streamline.c.orig	2026-02-01 19:10:14.020988733 +0100
++++ dx-4.4.4/src/exec/dxmods/streamline.c	2026-02-01 21:38:33.262024785 +0100
+@@ -443,12 +443,12 @@ Streamline(VectorField vf, 	/* Vector fi
+     double     	 t, t2, elapsedtime;
+     int		 nDim;
+     int		 done, keepPoint;
+-    Error	 (*Interpolate)();
+-    Error	 (*StepTime)();
+-    Error	 (*FindBoundary)();
+-    int 	 (*Neighbor)();
+-    int 	 (*Weights)();
+-    int 	 (*FaceWeights)();
++    Error	 (*Interpolate)(InstanceVars, POINT_TYPE *, VECTOR_TYPE *);
++    Error	 (*StepTime)(InstanceVars, double, VECTOR_TYPE *, double *);
++    Error	 (*FindBoundary)(InstanceVars, POINT_TYPE *, VECTOR_TYPE *, double *);
++    int 	 (*Neighbor)(InstanceVars, VECTOR_TYPE *);
++    int 	 (*Weights)(InstanceVars, POINT_TYPE *);
++    int 	 (*FaceWeights)(InstanceVars, POINT_TYPE *);
+     Field 	 field = NULL;
+     int 	 i, totKnt, zeroKnt, streamKnt;
+     InstanceVars I = NULL;
+--- dx-4.4.4/src/exec/dxmods/tube.c.orig	2000-08-24 22:04:54.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/tube.c	2026-02-01 21:40:58.676138648 +0100
+@@ -18,8 +18,8 @@
+ #include <dx/dx.h>
+ #include "_autocolor.h"
+ 
+-static Error tube_diameter();
+-static Error tube_ngon();
++static Error tube_diameter(Object, float *);
++static Error tube_ngon(Object, int *);
+ 
+ int m_Tube(in, out)
+     Object	*in;
+--- dx-4.4.4/src/exec/dxmods/_divcurl.c.orig	2006-01-05 23:55:42.000000000 +0100
++++ dx-4.4.4/src/exec/dxmods/_divcurl.c	2026-02-01 21:43:00.840127712 +0100
+@@ -666,7 +666,7 @@ static Error
+ _dxfDivCurlIrregular(Field field)
+ {
+     Array       pA = NULL, cA = NULL, dA = NULL, curlA = NULL, divA = NULL;
+-    void        (*elementMethod)() = NULL;
++    void        (*elementMethod)(ArrayHandle, Pointer, Type, float *, float *, byte *, int *) = NULL;
+     Object      attr;
+     int         pDim, nVperE, nPoints, nElements, eDim = 0;
+     Type        dataType;
+--- dx-4.4.4/src/exec/dxmods/_getfield.c.orig	2006-07-11 22:44:18.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/_getfield.c	2026-02-02 17:29:20.310280828 +0100
+@@ -113,6 +113,7 @@ NEW_ALLO ( ALLO_field_info,     field_in
+ 
+ /* ----------------------------- "New" section ----------------------------- */
+ 
++typedef Error (*GetItemProc)(int, array_info, Pointer);
+ 
+ static 
+ array_info in_memory_array ( Array input, array_info output ) 
+@@ -982,7 +983,7 @@ Error _dxf_FreeInMemory ( field_info inp
+ 
+ component_info _dxf_SetIterator ( component_info input )
+ {
+-    Error (*get_item) () = NULL;
++    GetItemProc get_item = NULL;
+ 
+     DXASSERTGOTO ( ERROR != input );
+     DXASSERTGOTO ( ERROR != ((array_info)&input->array)->array );
+@@ -1005,11 +1006,11 @@ component_info _dxf_SetIterator ( compon
+                             switch ( ((array_info)&input->array)->shape[0] )
+                             {
+                                 case 1:
+-                                    get_item = _dxf_get_point_grid_1D;  break;
++                                    get_item = (GetItemProc)_dxf_get_point_grid_1D;  break;
+                                 case 2:
+-                                    get_item = _dxf_get_point_grid_2D;  break;
++                                    get_item = (GetItemProc)_dxf_get_point_grid_2D;  break;
+                                 case 3:
+-                                    get_item = _dxf_get_point_grid_3D;  break;
++                                    get_item = (GetItemProc)_dxf_get_point_grid_3D;  break;
+                                 default:
+                                     DXErrorGoto3
+                                         ( ERROR_NOT_IMPLEMENTED,
+@@ -1026,9 +1027,9 @@ component_info _dxf_SetIterator ( compon
+                 case CLASS_ARRAY:
+                     switch ( ((array_info)&input->array)->shape[0] )
+                     {
+-                        case 1:  get_item = _dxf_get_point_irr_1D;  break;
+-                        case 2:  get_item = _dxf_get_point_irr_2D;  break;
+-                        case 3:  get_item = _dxf_get_point_irr_3D;  break;
++                        case 1:  get_item = (GetItemProc)_dxf_get_point_irr_1D;  break;
++                        case 2:  get_item = (GetItemProc)_dxf_get_point_irr_2D;  break;
++                        case 3:  get_item = (GetItemProc)_dxf_get_point_irr_3D;  break;
+                         default:
+                             DXErrorGoto3
+                                 ( ERROR_NOT_IMPLEMENTED,
+@@ -1051,14 +1052,14 @@ component_info _dxf_SetIterator ( compon
+                         case CLASS_MESHARRAY:
+                             switch ( ((mesh_array_info)&input->array)->grid )
+                             {
+-                                case TTRUE: get_item = _dxf_get_conn_grid_LINES;
++                                case TTRUE: get_item = (GetItemProc)_dxf_get_conn_grid_LINES;
+                                     break;
+ 
+                                 default:;
+                             }
+                             break;
+         
+-                        case CLASS_ARRAY: get_item = _dxf_get_conn_irr_LINES;
++                        case CLASS_ARRAY: get_item = (GetItemProc)_dxf_get_conn_irr_LINES;
+                             break;
+ 
+                         default:;
+@@ -1071,14 +1072,14 @@ component_info _dxf_SetIterator ( compon
+                         case CLASS_MESHARRAY:
+                             switch ( ((mesh_array_info)&input->array)->grid )
+                             {
+-                                case TTRUE: get_item = _dxf_get_conn_grid_QUADS;
++                                case TTRUE: get_item = (GetItemProc)_dxf_get_conn_grid_QUADS;
+                                     break;
+         
+                                 default:;
+                             }
+                             break;
+ 
+-                        case CLASS_ARRAY: get_item = _dxf_get_conn_irr_QUADS;
++                        case CLASS_ARRAY: get_item = (GetItemProc)_dxf_get_conn_irr_QUADS;
+                             break;
+ 
+                         default:;
+@@ -1086,7 +1087,7 @@ component_info _dxf_SetIterator ( compon
+                     break;
+         
+                 case TRIANGLES:
+-                    get_item = _dxf_get_conn_irr_TRIS;
++                    get_item = (GetItemProc)_dxf_get_conn_irr_TRIS;
+                     break;
+         
+                 case CUBES:
+@@ -1095,7 +1096,7 @@ component_info _dxf_SetIterator ( compon
+                         case CLASS_MESHARRAY:
+                             switch ( ((mesh_array_info)&input->array)->grid )
+                             {
+-                                case TTRUE: get_item = _dxf_get_conn_grid_CUBES;
++                                case TTRUE: get_item = (GetItemProc)_dxf_get_conn_grid_CUBES;
+                                     break;
+         
+                                 default:;
+@@ -1103,7 +1104,7 @@ component_info _dxf_SetIterator ( compon
+                             break;
+         
+                         case CLASS_ARRAY:
+-                            get_item = _dxf_get_conn_irr_CUBES;
++                            get_item = (GetItemProc)_dxf_get_conn_irr_CUBES;
+                             break;
+ 
+                         default:;
+@@ -1111,7 +1112,7 @@ component_info _dxf_SetIterator ( compon
+                     break;
+ 
+                 case TETRAHEDRA:
+-                    get_item = _dxf_get_conn_irr_TETS;
++                    get_item = (GetItemProc)_dxf_get_conn_irr_TETS;
+                     break;
+ 
+                 case PRISMS:
+@@ -1122,7 +1123,7 @@ component_info _dxf_SetIterator ( compon
+                                      ( ((array_info)&input->array)->array )) ) )
+                         goto error;
+ 
+-                    get_item = _dxf_get_conn_irr_PRSMS;
++                    get_item = (GetItemProc)_dxf_get_conn_irr_PRSMS;
+                     break;
+ 
+                 case CUBES4D:
+@@ -1158,7 +1159,7 @@ component_info _dxf_SetIterator ( compon
+     if ( NULL == get_item ) {
+         if ( ERROR != ( ((array_info)&input->array)->handle
+                  = DXCreateArrayHandle ( ((array_info)&input->array)->array )) )
+-            get_item = _dxf_get_item_by_handle;
++            get_item = (GetItemProc)_dxf_get_item_by_handle;
+         else
+             goto error;
+     }
+@@ -1176,7 +1177,7 @@ component_info _dxf_SetIterator ( compon
+ 
+ component_info _dxf_SetIterator_i ( component_info input )
+ {
+-    Error (*get_item) () = NULL;
++    GetItemProc get_item = NULL;
+ 
+     DXASSERTGOTO ( ERROR != input );
+     DXASSERTGOTO ( ERROR != ((array_info)&input->array)->array );
+@@ -1198,23 +1199,23 @@ component_info _dxf_SetIterator_i ( comp
+                 case CLASS_REGULARARRAY:
+                     switch ( ((array_info)&input->array)->type )
+                     {
+-                        case TYPE_FLOAT:  get_item = _dxf_get_data_reg_FLOAT;
++                        case TYPE_FLOAT:  get_item = (GetItemProc)_dxf_get_data_reg_FLOAT;
+                              break;
+-                        case TYPE_BYTE:   get_item = _dxf_get_data_reg_BYTE;
++                        case TYPE_BYTE:   get_item = (GetItemProc)_dxf_get_data_reg_BYTE;
+                              break;
+-                        case TYPE_DOUBLE: get_item = _dxf_get_data_reg_DOUBLE;
++                        case TYPE_DOUBLE: get_item = (GetItemProc)_dxf_get_data_reg_DOUBLE;
+                              break;
+-                        case TYPE_HYPER:  get_item = _dxf_get_data_reg_HYPER;
++                        case TYPE_HYPER:  get_item = (GetItemProc)_dxf_get_data_reg_HYPER;
+                              break;
+-                        case TYPE_INT:    get_item = _dxf_get_data_reg_INT;
++                        case TYPE_INT:    get_item = (GetItemProc)_dxf_get_data_reg_INT;
+                              break;
+-                        case TYPE_SHORT:  get_item = _dxf_get_data_reg_SHORT;
++                        case TYPE_SHORT:  get_item = (GetItemProc)_dxf_get_data_reg_SHORT;
+                              break;
+-                        case TYPE_UBYTE:  get_item = _dxf_get_data_reg_UBYTE;
++                        case TYPE_UBYTE:  get_item = (GetItemProc)_dxf_get_data_reg_UBYTE;
+                              break;
+-                        case TYPE_UINT:   get_item = _dxf_get_data_reg_UINT;
++                        case TYPE_UINT:   get_item = (GetItemProc)_dxf_get_data_reg_UINT;
+                              break;
+-                        case TYPE_USHORT: get_item = _dxf_get_data_reg_USHORT;
++                        case TYPE_USHORT: get_item = (GetItemProc)_dxf_get_data_reg_USHORT;
+                              break;
+ 		        default: break;
+                     }
+@@ -1223,23 +1224,23 @@ component_info _dxf_SetIterator_i ( comp
+                 case CLASS_ARRAY:
+                     switch ( ((array_info)&input->array)->type )
+                     {
+-                        case TYPE_FLOAT:  get_item = _dxf_get_data_irr_FLOAT;
++                        case TYPE_FLOAT:  get_item = (GetItemProc)_dxf_get_data_irr_FLOAT;
+                              break;
+-                        case TYPE_BYTE:   get_item = _dxf_get_data_irr_BYTE;
++                        case TYPE_BYTE:   get_item = (GetItemProc)_dxf_get_data_irr_BYTE;
+                              break;
+-                        case TYPE_DOUBLE: get_item = _dxf_get_data_irr_DOUBLE;
++                        case TYPE_DOUBLE: get_item = (GetItemProc)_dxf_get_data_irr_DOUBLE;
+                              break;
+-                        case TYPE_HYPER:  get_item = _dxf_get_data_irr_HYPER;
++                        case TYPE_HYPER:  get_item = (GetItemProc)_dxf_get_data_irr_HYPER;
+                              break;
+-                        case TYPE_INT:    get_item = _dxf_get_data_irr_INT;
++                        case TYPE_INT:    get_item = (GetItemProc)_dxf_get_data_irr_INT;
+                              break;
+-                        case TYPE_SHORT:  get_item = _dxf_get_data_irr_SHORT;
++                        case TYPE_SHORT:  get_item = (GetItemProc)_dxf_get_data_irr_SHORT;
+                              break;
+-                        case TYPE_UBYTE:  get_item = _dxf_get_data_irr_UBYTE;
++                        case TYPE_UBYTE:  get_item = (GetItemProc)_dxf_get_data_irr_UBYTE;
+                              break;
+-                        case TYPE_UINT:   get_item = _dxf_get_data_irr_UINT;
++                        case TYPE_UINT:   get_item = (GetItemProc)_dxf_get_data_irr_UINT;
+                              break;
+-                        case TYPE_USHORT: get_item = _dxf_get_data_irr_USHORT;
++                        case TYPE_USHORT: get_item = (GetItemProc)_dxf_get_data_irr_USHORT;
+                              break;
+ 		        default: break;
+                     }
+--- dx-4.4.4/src/exec/dxmods/_gradient.c.orig	2000-08-24 22:04:12.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/_gradient.c	2026-02-02 17:32:48.268043620 +0100
+@@ -921,7 +921,7 @@ static Error
+ _dxfGradientIrregular(Field field)
+ {
+     Array       pA = NULL, cA = NULL, dA = NULL, gA = NULL;
+-    void        (*elementMethod)() = NULL;
++    void        (*elementMethod)(ArrayHandle, Pointer, Type, float *, byte *, int *, int) = NULL;
+     Object      attr;
+     int         pDim, nVperE, nPoints, nElements;
+     Type        dataType;
+--- dx-4.4.4/src/exec/dxmods/_grid.c.orig	2026-02-01 19:10:14.020988733 +0100
++++ dx-4.4.4/src/exec/dxmods/_grid.c	2026-02-02 17:56:35.452183918 +0100
+@@ -27,17 +27,17 @@ typedef struct
+     Array		cons;
+ } GridOutputs;
+ 
+-static Error grid_point ();
+-static Error grid_line ();
+-static Error grid_rectangle ();
+-static Error grid_crosshair ();
+-static Error grid_ellipse ();
+-static Error grid_brick ();
+-static Error generate_crosshair_pos ();
+-static Error generate_ellipse_pos ();
+-static Error generate_crosshair_cons ();
+-static Error generate_ellipse_cons ();
+-static Error generate_field ();
++static Error grid_point (float *, int, Object *);
++static Error grid_line (float *, float *, int *, int, Object *);
++static Error grid_rectangle (float *, float *, int *, int, Object *);
++static Error grid_crosshair (float *, float *, int *, int, Object *);
++static Error grid_ellipse (float *, float *, int *, int, Object *);
++static Error grid_brick (float *, float *, int *, int, Object *);
++static Error generate_crosshair_pos (float *, float *, int *, float *, float *);
++static Error generate_ellipse_pos (float *, float *, float *, int *, int);
++static Error generate_crosshair_cons (int *, int *);
++static Error generate_ellipse_cons (int *, int *);
++static Error generate_field (char *, Array, Array, Object *);
+ /* CLEANUP FOR apos AND acons FOR ALL FUNCTIONS OCCURS IN generate_field() */
+ 
+ int _dxfGrid (float *point, char *structure, float *shape, int *density, 
+--- dx-4.4.4/src/exec/dxmods/_isosurface.c.orig	2026-02-02 21:35:44.144696379 +0100
++++ dx-4.4.4/src/exec/dxmods/_isosurface.c	2026-02-02 21:35:48.928055068 +0100
+@@ -5739,6 +5739,8 @@ Field create_iso_surface
+ }
+ 
+ 
++typedef Field (*CreateFunc) (field_info, float *, int, ...);
++typedef Error (*ConvertFunc) (Pointer, float[], hash_table_ptr, hash_table_ptr, int);
+ 
+ static
+ Error isosurface_field
+@@ -5759,8 +5761,8 @@ Error isosurface_field
+     field_info    input_info = NULL;
+     array_info    d_info = NULL;
+ 
+-    Field (*create_output)      () = NULL;
+-    Error (*convert_connection) () = NULL;
++    CreateFunc    create_output = NULL;
++    ConvertFunc   convert_connection = NULL;
+ 
+ #ifdef WHITEBOX_TEST
+     for ( i=0; i<8;   i++ ) histograms.polygonalizations[i] = 0;
+@@ -5830,33 +5832,33 @@ Error isosurface_field
+             switch ( input_info->std_comps[(int)CONNECTIONS]->element_type )
+             {
+                 case LINES:
+-                    create_output      = create_iso_points;
++                    create_output      = (CreateFunc)create_iso_points;
+                     convert_connection = NULL;
+                     break;
+ 
+                 case QUADRILATERALS:
+-                    create_output      = create_iso_contours;
+-                    convert_connection = iso_convert_quadrilateral;
++                    create_output      = (CreateFunc)create_iso_contours;
++                    convert_connection = (ConvertFunc)iso_convert_quadrilateral;
+                     break;
+ 
+                 case TRIANGLES:
+-                    create_output      = create_iso_contours;
+-                    convert_connection = iso_convert_triangle;
++                    create_output      = (CreateFunc)create_iso_contours;
++                    convert_connection = (ConvertFunc)iso_convert_triangle;
+                     break;
+ 
+                 case CUBES:
+-                    create_output      = create_iso_surface;
+-                    convert_connection = iso_convert_cube;
++                    create_output      = (CreateFunc)create_iso_surface;
++                    convert_connection = (ConvertFunc)iso_convert_cube;
+                     break;
+ 
+                 case TETRAHEDRA:
+-                    create_output      = create_iso_surface;
+-                    convert_connection = iso_convert_tetrahedron;
++                    create_output      = (CreateFunc)create_iso_surface;
++                    convert_connection = (ConvertFunc)iso_convert_tetrahedron;
+                     break;
+ 
+                 case PRISMS:
+-                    create_output      = create_iso_surface;
+-                    convert_connection = iso_convert_prism;
++                    create_output      = (CreateFunc)create_iso_surface;
++                    convert_connection = (ConvertFunc)iso_convert_prism;
+                     break;
+ 
+                 case CUBES4D:
+@@ -5875,18 +5877,18 @@ Error isosurface_field
+             switch ( input_info->std_comps[(int)CONNECTIONS]->element_type )
+             {
+                 case LINES:
+-                    create_output      = create_band_lines;
+-                    convert_connection = band_convert_line;
++                    create_output      = (CreateFunc)create_band_lines;
++                    convert_connection = (ConvertFunc)band_convert_line;
+                     break;
+ 
+                 case QUADRILATERALS:
+-                    create_output      = create_band_surface;
+-                    convert_connection = band_convert_quadrilateral;
++                    create_output      = (CreateFunc)create_band_surface;
++                    convert_connection = (ConvertFunc)band_convert_quadrilateral;
+                     break;
+ 
+                 case TRIANGLES:
+-                    create_output      = create_band_surface;
+-                    convert_connection = band_convert_triangle;
++                    create_output      = (CreateFunc)create_band_surface;
++                    convert_connection = (ConvertFunc)band_convert_triangle;
+                     break;
+ 
+                 case CUBES:
+@@ -5915,7 +5917,7 @@ Error isosurface_field
+                                ( input_info,
+                                  &values[i],
+                                  is_grown,
+-                                 convert_connection,
++                                 (ConvertFunc)convert_connection,
+                                  out_h[i] );
+ 
+                 if ( DXGetError() != ERROR_NONE )
+--- dx-4.4.4/src/exec/dxmods/_refinetopo.c.orig	2006-07-10 23:39:58.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/_refinetopo.c	2026-02-02 21:39:24.625865136 +0100
+@@ -31,7 +31,7 @@
+ static Object ChgTopologyObject(Object, int);
+ static Error  ChgTopologyField(Pointer);
+ 
+-typedef Field (*PFF)();
++typedef Field (*PFF)(Field);
+ 
+ static Field  None2None(Field);
+ 
+--- dx-4.4.4/src/exec/dxmods/_sample.c.orig	2026-02-02 21:46:13.801367482 +0100
++++ dx-4.4.4/src/exec/dxmods/_sample.c	2026-02-02 21:46:18.414725271 +0100
+@@ -58,8 +58,8 @@ error:
+     return NULL;
+ }
+     
+-typedef float			(*PFF)();
+-typedef Error			(*PFE)();
++typedef float			(*PFF)(float **, int);
++typedef Error			(*PFE)(Field, int, Array);
+ 
+ typedef struct
+ {
+@@ -1770,9 +1770,9 @@ static Field  CreateOutputIrreg(Field, S
+ static Field  CreateOutputPolylines(Field, SegList *, SegList *);
+ static Field  CreateOutputFaces(Field, SegList *, SegList *);
+ 
+-static Error  PlanarSurface(Field, int, int (*inside)(), int, Array);
+-static Error  CurvedSurface(Field, int, int (*inside)(), int, Array);
+-static Error  Volume(Field, int, int (*inside)(), int, Array);
++static Error  PlanarSurface(Field, int, int (*inside)(float *, float **, float *), int, Array);
++static Error  CurvedSurface(Field, int, int (*inside)(float *, float **, float *), int, Array);
++static Error  Volume(Field, int, int (*inside)(float *, float **, float *), int, Array);
+ 
+ static PFE
+ _dxfGetSampleMethod(Field field)
+@@ -1978,7 +1978,7 @@ typedef struct
+ 
+ static Error
+ PlanarSurface(Field field, int vPerE,
+-	int (*inside)(),
++	int (*inside)(float *, float **, float *),
+ 	int nSamples, Array grid)
+ {
+     Array		   a_connections, a_positions;
+@@ -2276,7 +2276,7 @@ error:
+ 
+ static Error
+ CurvedSurface(Field field,
+-		int vPerE, int (*inside)(),
++		int vPerE, int (*inside)(float *, float **, float *),
+ 		int nSamples, Array grid)
+ {
+     Array		   a_connections, a_positions;
+@@ -2611,7 +2611,7 @@ error:
+ 
+ static Error
+ Volume(Field field,
+-		int vPerE, int (*inside)(),
++		int vPerE, int (*inside)(float *, float **, float *),
+ 		int nSamples, Array grid)
+ {
+     Array		   a_connections, a_positions;
+--- dx-4.4.4/src/exec/dxmods/genimp_parse.c.orig	2002-03-21 18:10:00.000000000 +0100
++++ dx-4.4.4/src/exec/dxmods/genimp_parse.c	2026-02-02 21:51:51.729824902 +0100
+@@ -81,7 +81,7 @@ static Error get_type(struct parse_state
+ 
+ struct parameter{
+ 	char	name[32];
+-	int	(* getInfo)();
++	int	(* getInfo)(struct parse_state *);
+ 	int	flags;
+ };
+ 
+@@ -118,7 +118,7 @@ static struct parameter para[] =
+ 	{ "header",       infoHeader,		0},
+ 	{ "interleaving", infoInterleaving,	0},
+ 	{ "block",        infoBlock,		0},
+-	{ "positions",    infoPositions,	0},
++	{ "positions",    (int (*)(struct parse_state *))infoPositions,	0},
+ 	{ "points",       infoPoints,		0},
+ 	{ "dependency",   infoDepend,		0},
+ 	{ "recordseparator", infoRecSeparat,	0},
+@@ -201,7 +201,7 @@ _dxf_gi_InputInfoTable(char *table, char
+                         i = NUM_PARS; /* Exit for loop */
+ 		    } else {
+ 			if (i==PARAM_Positions){
+-			   if(!(* para[i].getInfo)(&ps,&dataps))
++			   if(!((int (*)(struct parse_state *, struct place_state *))(* para[i].getInfo))(&ps,&dataps))
+ 			      goto parse_error;
+ 			}
+ 			else
+--- dx-4.4.4/src/exec/dxmods/superwinX.c.orig	2002-03-21 18:10:06.000000000 +0100
++++ dx-4.4.4/src/exec/dxmods/superwinX.c	2026-02-03 19:00:54.121155934 +0100
+@@ -23,8 +23,8 @@ extern void  DXFree(void *); /* from lib
+ extern int   DXRegisterWindowHandlerWithCheckProcWithCheckProc(int (*proc)(int, void *), /* from libdx/xwindow.c */
+ 			int (*check)(int, void *), Display *, void *);
+ 
+-extern int DXRegisterWindowHandlerWithCheckProc();  /* from libdx/xwindow.c */
+-extern int DXReadyToRun(); /* from libdx/outglue.c */
++extern int DXRegisterWindowHandlerWithCheckProc(Error (*)(int, Pointer), int (*)(int, Pointer), Display *, Pointer);  /* from libdx/xwindow.c */
++extern int DXReadyToRun(Pointer); /* from libdx/outglue.c */
+ 
+ 
+ struct _iwx
+--- dx-4.4.4/src/exec/dxmods/tracevisual.c.orig	2003-07-12 02:12:06.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/tracevisual.c	2026-02-03 19:04:35.815666763 +0100
+@@ -139,7 +139,7 @@ static Error memsee(int blocktype, Point
+ static Error memsee1(int blocktype, Pointer start, ulong size, Pointer p);
+ static Error memquery(int blocktype, Pointer start, ulong size, Pointer p);
+ 
+-void _dxf_sigcatch();
++void _dxf_sigcatch(int);
+ #define NSECONDS 2    /* automatic update */
+ 
+ 
+@@ -883,7 +883,7 @@ error:
+ }
+ 
+ 
+-void _dxf_sigcatch()
++void _dxf_sigcatch(int unused)
+ {
+     if (d_small)
+ 	report_memory(d_small);
+--- dx-4.4.4/src/exec/dxmods/dxlinnamed.c.orig	2000-08-24 22:04:28.000000000 +0200
++++ dx-4.4.4/src/exec/dxmods/dxlinnamed.c	2026-02-03 19:07:05.249796223 +0100
+@@ -63,7 +63,7 @@ m_DXLInputNamed(Object *in, Object *out)
+     args[0] = NAME;
+     args[1] = NULL;
+ 
+-    if (! _dxf_ExRunOn(1, _getv, (Pointer)args, 0))
++    if (! _dxf_ExRunOn(1, (Error (*)(Pointer))_getv, (Pointer)args, 0))
+     {
+ 	DXSetError(ERROR_INTERNAL, "_getv");
+ 	return ERROR;
+@@ -103,7 +103,7 @@ m_SetDXLInputNamed(Object *in, Object *o
+     args[0] = NAME;
+     args[1] = VALUE;
+ 
+-    if (! _dxf_ExRunOn(1, _setv, (Pointer)args, 0))
++    if (! _dxf_ExRunOn(1, (Error (*)(Pointer))_setv, (Pointer)args, 0))
+     {
+ 	DXSetError(ERROR_INTERNAL, "_setv");
+ 	return ERROR;
+--- dx-4.4.4/src/exec/dpexec/parse.h.orig	2026-02-03 19:11:01.154387275 +0100
++++ dx-4.4.4/src/exec/dpexec/parse.h	2026-02-03 21:54:41.477067627 +0100
+@@ -110,7 +110,7 @@ typedef struct
+     struct node			*out;		/* output formals	*/
+     union {
+         struct node		*stmt;		/* macro definition	*/
+-        PFI			func;		/* code pointer		*/
++        int (*func)(Object *, Object *);	/* code pointer		*/
+     } def;
+     /* hidden inputs, before and/or after the list the user knows about */
+     int				prehidden;      /* hidden inputs before */
+@@ -380,8 +380,8 @@ void	_dxf_ExEvaluateConstants (int);
+ void     _dxf_ExEvalConstant (node *n);
+ 
+ /* for starting a task on one or all processors.  private to the exec */
+-Error _dxf_ExRunOnAll (PFE func, Pointer arg, int size);
+-Error _dxf_ExRunOn (int JID, PFE func, Pointer arg, int size);
++Error _dxf_ExRunOnAll (Error (*func)(Pointer), Pointer arg, int size);
++Error _dxf_ExRunOn (int JID, Error (*func)(Pointer), Pointer arg, int size);
+ 
+ /*
+  * Parsing Variables
+--- dx-4.4.4/src/exec/hwrender/opengl/hwPortUtilOGL.c.orig	2006-06-26 23:28:54.000000000 +0200
++++ dx-4.4.4/src/exec/hwrender/opengl/hwPortUtilOGL.c	2026-02-03 19:15:41.239213872 +0100
+@@ -57,7 +57,7 @@ Based on hwrender/gl/hwPortUtil.c
+ 
+ static void loadTexture(xfieldP);
+ static void startTexture(xfieldP);
+-static void endTexture();
++static void endTexture(void);
+ 
+ static int doesTrans;
+ /* screen door half-transparency pattern */
+@@ -1729,7 +1729,7 @@ Error _dxf_DrawTranslucentOGL(void *glob
+         goto error;
+ 
+     if(xf->texture)
+-       endTexture(xf);
++       endTexture();
+ 
+     _dxf_SET_GLOBAL_LIGHT_ATTRIBUTES(PORT_CTX ,0) ;
+     _dxf_POP_MATRIX(PORT_CTX) ;
+@@ -1931,7 +1931,7 @@ Error _dxf_DrawOpaqueOGL(tdmPortHandleP
+   OGL_FAIL_ON_ERROR(Back);
+ /*  done: */
+   if(xf->texture)
+-     endTexture(xf);
++     endTexture();
+ 
+   /*
+    * Disable lighting, reset matrix stack
+--- dx-4.4.4/src/exec/hwrender/hwPortLayer.h.orig	2006-06-29 18:05:13.000000000 +0200
++++ dx-4.4.4/src/exec/hwrender/hwPortLayer.h	2026-02-03 19:39:52.863625934 +0100
+@@ -257,7 +257,7 @@ typedef struct tdmPortHandleS {
+   void*			dpy;
+   tdmDrawPortP		portFuncs;
+   tdmInteractorEchoP	echoFuncs;
+-  void			(*uninitP)();
++  void			(*uninitP)(tdmPortHandleP);
+   void*			private;
+ } tdmPortHandleT;
+ 
+--- dx-4.4.4/src/exec/hwrender/hwObject.h.orig	2002-10-29 23:37:32.000000000 +0100
++++ dx-4.4.4/src/exec/hwrender/hwObject.h	2026-02-03 19:42:59.697959325 +0100
+@@ -55,7 +55,7 @@ typedef	dxObject gatherO;
+ typedef	dxObject translationO;
+ typedef	dxObject materialO;
+ 
+-dxObject _dxf_newHwObject(hwClass class, Pointer item, Error (*delete)());
++dxObject _dxf_newHwObject(hwClass class, Pointer item, Error (*delete)(Pointer));
+ Error    _dxf_deleteHwObject(Pointer p);
+ Pointer  _dxf_getHwObjectData(dxObject p);
+ hwClass  _dxf_getHwClass(dxObject p);
+--- dx-4.4.4/src/exec/hwrender/hwObject.c.orig	2002-10-29 23:37:28.000000000 +0100
++++ dx-4.4.4/src/exec/hwrender/hwObject.c	2026-02-03 19:43:49.404892056 +0100
+@@ -14,7 +14,7 @@
+ 
+ 
+ dxObject
+-_dxf_newHwObject(hwClass class, Pointer item, Error (*delete)())
++_dxf_newHwObject(hwClass class, Pointer item, Error (*delete)(Pointer))
+ {
+   hwObjectP gPriv;
+ 
+--- dx-4.4.4/src/exec/hwrender/hwPortHandle.c.orig	2003-07-12 02:12:07.000000000 +0200
++++ dx-4.4.4/src/exec/hwrender/hwPortHandle.c	2026-02-03 20:25:44.588368950 +0100
+@@ -43,10 +43,10 @@
+ extern tdmInteractorEchoP   	_dxf_initInteractorEchoPort ();
+ 
+ #if defined(DX_NATIVE_WINDOWS)
+-int _dxfHWload(tdmPortHandleP (**initPP)(char*,void(*)(tdmPortHandleP)));
++int _dxfHWload(tdmPortHandleP (**initPP)(char*));
+ #else
+ int
+-_dxfHWload(tdmPortHandleP (**initPP)(Display*, char*,void(*)(tdmPortHandleP)), Display *);
++_dxfHWload(tdmPortHandleP (**initPP)(Display*, char*), Display *);
+ #endif
+ 
+ 
+@@ -99,10 +99,10 @@ _dxfNewPortHandle(tdmParsedFormatP forma
+    */
+ 
+   tdmPortHandleP	ret = NULL;
+-  tdmPortHandleP	(*_initP)();
+ 
+ 
+ #if defined(DX_NATIVE_WINDOWS)
++  tdmPortHandleP	(*_initP)(char *);
+ 
+   if (! _dxfHWload(&_initP))
+       goto error;
+@@ -111,6 +111,7 @@ _dxfNewPortHandle(tdmParsedFormatP forma
+     goto error;
+ 
+ #else
++  tdmPortHandleP	(*_initP)(Display *, char *);
+ 
+   ENTRY(("_dxfNewPortHandle(0x%x, 0x%x)", format, dpy));
+ 
+--- dx-4.4.4/src/exec/hwrender/hwInteractor.h.orig	2026-02-03 21:19:55.399183100 +0100
++++ dx-4.4.4/src/exec/hwrender/hwInteractor.h	2026-02-03 21:19:57.705862154 +0100
+@@ -133,8 +133,8 @@ struct tdmInteractorS {
+   void (*EchoFunc)    (tdmInteractor, void *, float[4][4], int) ;
+   void (*Destroy)     (tdmInteractor) ;
+ 
+-  void (*Config)() ;         /* parameters vary: beware type conversions */
+-  void (*restoreConfig)() ;  /* parameters vary: beware type conversions */
++  void (*Config)(tdmInteractor, ...) ;         /* parameters vary: beware type conversions */
++  void (*restoreConfig)(tdmInteractor, ...) ;  /* parameters vary: beware type conversions */
+ 
+   tdmInteractorWin cdata ;   /* pointer to common data */
+   void *pdata ;              /* pointer to private data */
+--- dx-4.4.4/src/exec/hwrender/hwRotateInteractor.c.orig	2026-02-03 21:20:09.902594315 +0100
++++ dx-4.4.4/src/exec/hwrender/hwRotateInteractor.c	2026-02-03 21:20:13.652614452 +0100
+@@ -68,7 +68,7 @@ static void orbitFrom (float R[4][4], fl
+  *  Null functions
+  */
+ 
+-static void NullFunction()
++static void NullFunction(tdmInteractor, ...)
+ {
+ }
+ 
+@@ -127,7 +127,7 @@ _dxfCreateRotationInteractor(tdmInteract
+     FUNC(I, EndStroke) = EndStroke ;
+     FUNC(I, ResumeEcho) = ResumeEcho ;
+     FUNC(I, Destroy) = Destroy ;
+-    FUNC(I, restoreConfig) = RestoreConfig ;
++    FUNC(I, restoreConfig) = (void (*)(tdmInteractor, ...))RestoreConfig ;
+     
+     switch (M)
+       {
+@@ -144,7 +144,7 @@ _dxfCreateRotationInteractor(tdmInteract
+       {
+       case tdmGlobeEcho:
+ 	FUNC(I, EchoFunc) = EFUNCS(DrawGlobe) ;
+-	FUNC(I, Config) = globeConfig ;
++	FUNC(I, Config) = (void (*)(tdmInteractor, ...))globeConfig ;
+ 	echoRadius = GLOBERADIUS ;
+ 	
+ 	/* globe is LL corner: window has no effect on size or placement */
+@@ -157,7 +157,7 @@ _dxfCreateRotationInteractor(tdmInteract
+ 	
+       case tdmGnomonEcho:
+ 	FUNC(I, EchoFunc) = EFUNCS(DrawGnomon) ;
+-	FUNC(I, Config) = gnomonConfig ;
++	FUNC(I, Config) = (void (*)(tdmInteractor, ...))gnomonConfig ;
+ 	echoRadius = GNOMONRADIUS ;
+ 	
+ 	PDATA(foreground) = (void *) 1 ;
+@@ -167,7 +167,7 @@ _dxfCreateRotationInteractor(tdmInteract
+       default:
+       case tdmNullEcho:
+ 	FUNC(I, EchoFunc) = NullEchoFunc ;
+-	FUNC(I, Config) = gnomonConfig ;
++	FUNC(I, Config) = (void (*)(tdmInteractor, ...))gnomonConfig ;
+ 	echoRadius = 0 ;
+ 	
+ 	PDATA(foreground) = (void *) 0 ;
+@@ -231,8 +231,8 @@ _dxfCreateViewRotationInteractor (tdmInt
+       FUNC(I, ResumeEcho) = NullResumeEcho ;
+       FUNC(I, EchoFunc) = E ;
+       FUNC(I, Destroy) = _dxfDeallocateInteractor ;
+-      FUNC(I, Config) = viewerConfig ;
+-      FUNC(I, restoreConfig) = NullFunction ;
++      FUNC(I, Config) = (void (*)(tdmInteractor, ...))viewerConfig ;
++      FUNC(I, restoreConfig) = (void (*)(tdmInteractor, ...))NullFunction ;
+       
+       switch (M)
+ 	{
+--- dx-4.4.4/src/exec/hwrender/hwStereo.c.orig	2006-01-02 23:56:51.000000000 +0100
++++ dx-4.4.4/src/exec/hwrender/hwStereo.c	2026-02-03 21:22:34.540037666 +0100
+@@ -48,7 +48,7 @@ static int stereoSystemLoaded = 0;
+ Error
+ _dxfLoadStereoSystemModeFile(char *fname)
+ {
+-    int (*func)() = DXLoadObjFile(fname, "DXMODULES");
++    int (*func)(int *, StereoSystemMode **) = (int (*)(int *, StereoSystemMode **))DXLoadObjFile(fname, "DXMODULES");
+     if (! func)
+     {
+ 	DXWarning("unable to open stereo system mode file %s", fname);
+@@ -201,7 +201,7 @@ static int stereoCameraLoaded = 0;
+ Error
+ _dxfLoadStereoCameraModeFile(char *fname)
+ {
+-    int (*func)() = DXLoadObjFile(fname, "DXMODULES");
++    int (*func)(int *, StereoCameraMode **) = (int (*)(int *, StereoCameraMode **))DXLoadObjFile(fname, "DXMODULES");
+     if (! func)
+     {
+ 	DXWarning("unable to open stereo system mode file %s", fname);
+--- dx-4.4.4/src/exec/hwrender/hwXfield.c.orig	2006-06-29 17:51:16.000000000 +0200
++++ dx-4.4.4/src/exec/hwrender/hwXfield.c	2026-02-03 21:23:31.473677459 +0100
+@@ -983,7 +983,7 @@ _dxf_newXfieldO(Field f, attributeP attr
+   xfieldP 	xf = _dxf_newXfieldP(f, attributes, globals);
+ 
+   if (xf)
+-    xfo = (xfieldO)_dxf_newHwObject(HW_CLASS_XFIELD, (Pointer)xf, _dxf_deleteXfield);
++    xfo = (xfieldO)_dxf_newHwObject(HW_CLASS_XFIELD, (Pointer)xf, (Error (*)(Pointer))_dxf_deleteXfield);
+ 
+   EXIT(("xfo = 0x%x", xfo));
+   return xfo;
+--- dx-4.4.4/src/exec/dpexec/command.c.orig	2006-01-05 23:55:41.000000000 +0100
++++ dx-4.4.4/src/exec/dpexec/command.c	2026-02-03 21:37:48.151631568 +0100
+@@ -83,7 +83,7 @@ typedef struct _EXTab		*EXTab;
+ typedef struct _EXTab
+ {
+     char	*name;		/* string to match		*/
+-    PFI		func;		/* function to call on match	*/
++    Error	(*func)(char *, Object *);  /* function to call on match	*/
+     EXTab	table;		/* table to search on match	*/
+     int		size;		/* size of the table		*/
+ } _EXTab;
+@@ -241,7 +241,7 @@ Error _dxf_ExExecCommand (Object *in)
+         ;
+ 
+     if (MustRunOnMaster (in[0]))
+-	ret = _dxf_ExRunOn (1, CmdProc, in, ((i+1) * sizeof(Object)));
++	ret = _dxf_ExRunOn (1, (Error (*)(Pointer))CmdProc, in, ((i+1) * sizeof(Object)));
+     else
+ 	ret = CmdProc (in);
+ 
+@@ -1254,7 +1254,7 @@ static int LoadObjFile(char *c, Object *
+ 
+ static int LoadInteractors(char *c, Object *in)
+ {
+-    return _dxf_ExRunOn (1, _dxfLoadUserInteractors, (Pointer)c, strlen(c)+1);
++    return _dxf_ExRunOn (1, (Error (*)(Pointer))_dxfLoadUserInteractors, (Pointer)c, strlen(c)+1);
+ }
+ 
+ static int MdfLoadFile(char *c, Object *in)
+@@ -1352,7 +1352,7 @@ static int Pfsmgr (char *c, Object *in)
+ 
+     for (b = buf; *b; b++)
+ 	if (isspace (*b))
+-	    *b = (char) NULL;
++	    *b = 0;
+ 
+     ret = _dxf_pfsmgr (argc, argv);
+ 
+--- dx-4.4.4/src/exec/dpexec/distpacket.c.orig	2006-01-03 00:50:44.000000000 +0100
++++ dx-4.4.4/src/exec/dpexec/distpacket.c	2026-02-03 21:39:36.178880915 +0100
+@@ -277,7 +277,7 @@ void _dxf_ExDistributeMsg(DistMsg type,
+         else argp->data = data;
+ 
+         argp->to = to;
+-        _dxf_ExRunOn (1, DistributeMsgAP, argp, 0);
++        _dxf_ExRunOn (1, (Error (*)(Pointer))DistributeMsgAP, argp, 0);
+         if(size > 0)
+             DXFree(argp->data); 
+         DXFree(argp);
+--- dx-4.4.4/src/exec/dpexec/rq.h.orig	2004-07-29 21:46:29.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/rq.h	2026-02-04 21:27:38.600851687 +0100
+@@ -20,11 +20,11 @@
+ extern "C" {
+ #endif
+ 
+-void		_dxf_ExRQEnqueue	(PFI func, Pointer arg, int repeat,
++void		_dxf_ExRQEnqueue	(int (*func)(Pointer, int), Pointer arg, int repeat,
+ 				 long gid, 	/* Group ID (used)	*/
+ 				 int JID,	/* JOB (pinned proc) or 0 */
+ 				 int highpri);	/* run this NOW		*/
+-void		_dxf_ExRQEnqueueMany	(int n, PFI func[], Pointer arg[], int repeat[],
++void		_dxf_ExRQEnqueueMany	(int n, int (*func[])(Pointer, int), Pointer arg[], int repeat[],
+ 				 long gid, 	/* Group ID (used)	*/
+ 				 int JID, 	/* JOB (pinned proc) or 0 */
+ 				 int highpri);	/* run this NOW		*/
+--- dx-4.4.4/src/exec/dpexec/graph.h.orig	2004-07-29 21:46:29.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/graph.h	2026-02-03 21:53:38.420062979 +0100
+@@ -163,7 +163,7 @@ typedef struct gfunc
+     ModPath		mod_path;	/* module path (<mac/func>:<#> pairs) */
+     _ftype 		ftype;          /* macro, loop or module        */
+     union {
+-         PFI	  module;               /* function to call             */
++         int (*module)(Object *, Object *);  /* function to call             */
+          struct program  *subP;         /* loop or macro sub program    */
+     } 			func;
+     int			flags;		/* module flags			*/
+--- dx-4.4.4/src/exec/dpexec/function.h.orig	2004-07-29 21:46:29.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/function.h	2026-02-03 22:22:41.482720401 +0100
+@@ -19,7 +19,7 @@ extern "C" {
+ #endif
+ 
+ Error _dxf_ExFunctionDone ();
+-Error DXAddModuleV (char *name, PFI func, int flags, int nin, char *inlist[],
++Error DXAddModuleV (char *name, int (*func)(Object *, Object *), int flags, int nin, char *inlist[],
+                     int nout, char *outlist[], char *exec, char *host);
+ Error DXAddModule (char *name, ...);
+ 
+--- dx-4.4.4/src/exec/dpexec/function.c.orig	2002-03-22 00:51:01.000000000 +0100
++++ dx-4.4.4/src/exec/dpexec/function.c	2026-02-03 22:24:15.656556631 +0100
+@@ -159,7 +159,7 @@ int DXAddMacro (node *macro)
+  */
+ 
+ 
+-Error DXAddModuleV (char *name, PFI func, int flags, int nin, char *inlist[],
++Error DXAddModuleV (char *name, int (*func)(Object *, Object *), int flags, int nin, char *inlist[],
+ 		    int nout, char *outlist[], char *exec, char *host)
+ {
+     char		*par;
+@@ -424,7 +424,7 @@ Error DXAddModuleV (char *name, PFI func
+ Error DXAddModule (char *name, ...)
+ {
+     va_list		args;
+-    PFI			func;
++    int (*func)(Object *, Object *);
+     int			flags;
+     int			nin;
+     char 		**inlist;
+@@ -436,7 +436,7 @@ Error DXAddModule (char *name, ...)
+ 
+     va_start (args,name);
+ 
+-    func  = va_arg (args,PFI);
++    func  = va_arg (args,int (*)(Object *, Object *));
+     flags = va_arg (args,int);
+ 
+     nin = va_arg (args,int);
+--- dx-4.4.4/src/exec/dpexec/graph.c.orig	2026-02-01 19:10:14.020988733 +0100
++++ dx-4.4.4/src/exec/dpexec/graph.c	2026-02-03 22:25:44.297029979 +0100
+@@ -278,7 +278,7 @@ DeleteGvarObj(gvar *var)
+      */
+ 	    _dxf_ExRunOn (procId, DXDelete, (Pointer) obj, 0);
+ #endif
+-	    _dxf_ExRQEnqueue (DXDelete, (Pointer) obj, 1, 0, procId, TRUE);
++	    _dxf_ExRQEnqueue ((Error (*)(Pointer, int))DXDelete, (Pointer) obj, 1, 0, procId, TRUE);
+ 	}
+     }
+ }
+--- dx-4.4.4/src/exec/dpexec/lex.h.orig	2004-07-29 21:46:29.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/lex.h	2026-02-04 05:40:18.760758427 +0100
+@@ -30,16 +30,18 @@ typedef struct _cmdBuf
+     struct _cmdBuf *next;
+ } CmdBuf;
+ 
++typedef union YYSTYPE YYSTYPE;
++
+ extern SFILE       *yyin; /* from lex.c */
+ 
+-Error _dxf_ExInitLex();
+-void  _dxf_ExFlushNewLine();
+-void  _dxf_ExLexInit();
++Error _dxf_ExInitLex(void);
++void  _dxf_ExFlushNewLine(void);
++void  _dxf_ExLexInit(void);
+ void  _dxf_ExUIPacketActive(int id, int t, int n);
+-void  _dxf_ExLexError();
+-void  _dxf_ExUIFlushPacket();
+-int   ExCheckParseBuffer();
+-int   yylex();
++void  _dxf_ExLexError(void);
++void  _dxf_ExUIFlushPacket(void);
++int   ExCheckParseBuffer(void);
++int   yylex(YYSTYPE *lvalp);
+ void  yygrabdata(char *buffer, int len);
+ 
+ #if defined(__cplusplus) || defined(c_plusplus)
+--- dx-4.4.4/src/exec/dpexec/parsemdf.c.orig	2000-07-31 17:10:34.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/parsemdf.c	2026-02-04 21:01:28.132444289 +0100
+@@ -243,7 +243,7 @@ static Error callmdf(struct moddef *mp,
+ 	    }
+ #endif
+ 	    
+-	    if (_dxf_ExRunOnAll (callmdf_remote, mp->m_loadfile,
++	    if (_dxf_ExRunOnAll ((Error (*)(Pointer))callmdf_remote, mp->m_loadfile,
+ 				 strlen(mp->m_loadfile)+1) == ERROR) {
+ 		DXAddMessage("module %s", mp->m_name); 
+ 		return ERROR;
+@@ -282,7 +282,7 @@ static Error callmdf(struct moddef *mp,
+     if (DXProcessors(0) == 1 || _dxd_exGoneMP == 0)
+ 	rc = do_mdf_load(mp);
+     else
+-	rc = _dxf_ExRunOn (1, do_mdf_load, (Pointer)mp, 0);
++	rc = _dxf_ExRunOn (1, (Error (*)(Pointer))do_mdf_load, (Pointer)mp, 0);
+ 
+     
+     /* if running distributed, tell the others about the new module.
+--- dx-4.4.4/src/exec/dpexec/parsemdf.h.orig	2026-02-04 21:04:09.449974473 +0100
++++ dx-4.4.4/src/exec/dpexec/parsemdf.h	2026-02-04 21:04:12.769992245 +0100
+@@ -51,7 +51,7 @@ struct modargs {
+ 
+ struct moddef {
+     char *              m_name;       /* module name */
+-    PFI                 m_func;       /* entry point - function address */
++    Error (*m_func)(Object *, Object *);  /* entry point - function address */
+     int                 m_flags;      /* module flags */
+     int                 m_nin;        /* number of inputs */
+     struct modargs *    m_innames;    /* list of inputs - modargs structs */
+--- dx-4.4.4/src/exec/dpexec/queue.h.orig	2000-08-11 17:28:13.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/queue.h	2026-02-04 21:12:27.979309721 +0100
+@@ -21,8 +21,8 @@ typedef struct	_EXQueue		*EXQueue;
+ typedef struct	_EXQueueElement		*EXQueueElement;
+ 
+ EXQueue		_dxf_ExQueueCreate		(int local, int locking,
+-					 PFI enqueue, PFI dequeue,
+-					 PFI print,   PFI destroy);
++					 int (*enqueue)(Pointer), int (*dequeue)(Pointer),
++					 int (*print)(char *, Pointer), int (*destroy)(Pointer));
+ Error		_dxf_ExQueueDestroy		(EXQueue q);
+ 
+ Pointer		_dxf_ExQueueDequeue		(EXQueue q);
+--- dx-4.4.4/src/exec/dpexec/queue.c.orig	2002-03-22 00:51:03.000000000 +0100
++++ dx-4.4.4/src/exec/dpexec/queue.c	2026-02-04 21:13:22.836270075 +0100
+@@ -28,10 +28,10 @@ typedef struct _EXQueueElement
+ 
+ typedef struct _EXQueue
+ {
+-    PFI			enqueue;	/* called when adding element	*/
+-    PFI			dequeue;	/* called when removing element	*/
+-    PFI			print;		/* called to print   an element	*/
+-    PFI			destroy;	/* called to destroy an element	*/
++    int (*enqueue)(Pointer);		/* called when adding element	*/
++    int (*dequeue)(Pointer);		/* called when removing element	*/
++    int (*print)(char *, Pointer);	/* called to print   an element	*/
++    int (*destroy)(Pointer);		/* called to destroy an element	*/
+     int			items;		/* number in queue		*/
+     int			locking;	/* is locking required		*/
+     int			local;		/* is this a local queue	*/
+@@ -62,7 +62,7 @@ static Pointer	ExQueueRemove		(EXQueue q
+  */
+ 
+ EXQueue _dxf_ExQueueCreate (int local, int locking,
+-		       PFI enqueue, PFI dequeue, PFI print, PFI destroy)
++		       int (*enqueue)(Pointer), int (*dequeue)(Pointer), int (*print)(char *, Pointer), int (*destroy)(Pointer))
+ {
+     int			n;
+     EXQueue		q;
+@@ -119,7 +119,7 @@ EXQueue _dxf_ExQueueCreate (int local, i
+ Error _dxf_ExQueueDestroy (EXQueue q)
+ {
+     EXQueueElement	e, ne;
+-    PFI			rm;
++    int (*rm)(Pointer);
+ 
+     if (! q)
+ 	return (OK);
+@@ -253,7 +253,7 @@ static int ExQueueDefaultPrint (char *bu
+ 
+ static Error ExQueueInsert (EXQueue q, Pointer val, int head)
+ {
+-    PFI			enq;
++    int (*enq)(Pointer);
+     int			l;
+     EXQueueElement	e;
+     int			s;
+@@ -334,7 +334,7 @@ static Error ExQueueInsert (EXQueue q, P
+ 
+ static Pointer ExQueueRemove (EXQueue q, int head)
+ {
+-    PFI			deq;
++    int (*deq)(Pointer);
+     int			l;
+     EXQueueElement	e;
+     int			n;
+--- dx-4.4.4/src/exec/dpexec/rih.h.orig	2004-07-29 21:46:29.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/rih.h	2026-02-04 21:22:27.965855269 +0100
+@@ -22,10 +22,10 @@ extern "C" {
+ 
+ typedef struct
+ {
+-    PFE         proc;
++    Error (*proc)(int, Pointer);
+     int         fd;
+     Pointer     arg;
+-    PFI         check;
++    int (*check)(int, Pointer);
+     int         flag;
+     int         isWin;
+         void    *dpy;
+@@ -33,7 +33,7 @@ typedef struct
+ 
+ typedef struct
+ {
+-    PFE         proc;
++    Error (*proc)(Pointer);
+     Pointer     arg;
+     int         when;
+ } _EXRCH, *EXRCH;
+--- dx-4.4.4/src/exec/dpexec/rq.c.orig	2002-03-22 00:51:03.000000000 +0100
++++ dx-4.4.4/src/exec/dpexec/rq.c	2026-02-04 21:27:21.924095736 +0100
+@@ -26,7 +26,7 @@ typedef struct _EXRQJob
+     int		highpri;		/* run this NOW			*/
+     long	gid;			/* group id			*/
+     int		JID;			/* job   id			*/
+-    PFI		func;			/* function to call		*/
++    int (*func)(Pointer, int);		/* function to call		*/
+     Pointer	arg;			/* argument to pass		*/
+     int		repeat;			/* number of repetitions for job*/
+ } _EXRQJob;
+@@ -75,7 +75,7 @@ Error _dxf_ExRQInit (void)
+     return (OK);
+ }
+ 
+-void _dxf_ExRQEnqueue (PFI func, Pointer arg, int repeat,
++void _dxf_ExRQEnqueue (int (*func)(Pointer, int), Pointer arg, int repeat,
+ 		       long gid, int JID, int highpri)
+ {
+     volatile EXRQ	rq;
+@@ -179,7 +179,7 @@ MARK_TIME ("RQE Exit");
+         else {
+             if(send_RQ_message) {
+                 send_RQ_message = 0;
+-                _dxf_ExRunOn (1, _dxf_child_RQ_message, &JID, sizeof(int));
++                _dxf_ExRunOn (1, (Error (*)(Pointer))_dxf_child_RQ_message, &JID, sizeof(int));
+                 send_RQ_message = 1;
+             }
+         }
+@@ -192,7 +192,7 @@ MARK_TIME ("RQE Exit");
+  * the queue is then locked, and the jobs are enqueued all at once.
+  */
+ 
+-void _dxf_ExRQEnqueueMany (int n, PFI func[], Pointer arg[], 
++void _dxf_ExRQEnqueueMany (int n, int (*func[])(Pointer, int), Pointer arg[], 
+ 			int repeat[], long gid, int JID, int highpri)
+ {
+     volatile EXRQ	rq;
+@@ -321,7 +321,7 @@ MARK_TIME ("RQEM Queued");
+     DXunlock (l, exJID);
+ MARK_TIME ("RQEM Exit");
+     send_RQ_message = 0;
+-    _dxf_ExRunOn (1, _dxf_child_RQ_message, &JID, sizeof(int));
++    _dxf_ExRunOn (1, (Error (*)(Pointer))_dxf_child_RQ_message, &JID, sizeof(int));
+     send_RQ_message = 1;
+ }
+ 
+--- dx-4.4.4/src/exec/dpexec/socket.c.orig	2006-05-08 18:35:33.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/socket.c	2026-02-04 21:28:37.651167831 +0100
+@@ -66,7 +66,6 @@
+  */
+ int _dxf_ExGetSocket(char *name, int *port)
+ {
+-    char *getenv();
+     char *env;
+     char *p;
+ 
+--- dx-4.4.4/src/exec/dpexec/task.c.orig	2004-06-03 18:45:21.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/task.c	2026-02-04 22:20:15.761051847 +0100
+@@ -314,7 +314,7 @@ error:
+  * end of the current task group and "work" is ignored.
+  */
+ 
+-Error DXAddLikeTasks (PFE func, Pointer arg, int size, double work, int repeat)
++Error DXAddLikeTasks (Error (*func)(Pointer, int), Pointer arg, int size, double work, int repeat)
+ {
+     EXTaskGroup	tg	= NULL;
+     int		s;
+@@ -410,7 +410,7 @@ Error DXAddLikeTasks (PFE func, Pointer
+         t->taskContext = _dxd_exContext;
+ #endif
+         _dxfCopyContext(&(t->taskContext), _dxd_exContext);
+-	_dxf_ExRQEnqueue (ExProcessTask, (Pointer)t, repeat, 
++	_dxf_ExRQEnqueue ((int (*)(Pointer, int))ExProcessTask, (Pointer)t, repeat, 
+ 			  (long) tg, 0, FALSE);
+     }
+     else
+@@ -429,9 +429,9 @@ error:
+     return (ERROR);
+ }
+ 
+-Error DXAddTask (PFE func, Pointer arg, int size, double work)
++Error DXAddTask (Error (*func)(Pointer), Pointer arg, int size, double work)
+ {
+-    return DXAddLikeTasks (func, arg, size, work, 1);
++    return DXAddLikeTasks ((Error (*)(Pointer, int))func, arg, size, work, 1);
+ }
+ 
+ 
+@@ -674,7 +674,7 @@ SMP linux -- gda
+          * task group to be deleted.
+          */
+         if (lastTask)
+-            _dxf_ExRQEnqueue (ExDestroyTaskGroup, (Pointer)tg, 1, 0, tg->procId, FALSE);
++            _dxf_ExRQEnqueue ((int (*)(Pointer, int))ExDestroyTaskGroup, (Pointer)tg, 1, 0, tg->procId, FALSE);
+     }
+     else
+     {
+@@ -731,10 +731,10 @@ static Error ExProcessTaskGroup (int syn
+     int			totalTodo;
+ #define NUM_TASKS_ALLOCED 256
+     Pointer		_args[NUM_TASKS_ALLOCED];
+-    PFI			_funcs[NUM_TASKS_ALLOCED];
++    Error (*_funcs[NUM_TASKS_ALLOCED])(EXTask, int);
+     int			_repeats[NUM_TASKS_ALLOCED];
+     Pointer		*args	= _args;
+-    PFI			*funcs	= _funcs;
++    Error (**funcs)(EXTask, int) = _funcs;
+     int			*repeats = _repeats;
+     int			status;
+     WorkIndex 		_ilist[NUM_TASKS_ALLOCED];
+@@ -807,7 +807,7 @@ static Error ExProcessTaskGroup (int syn
+      */
+     if (todo > NUM_TASKS_ALLOCED) 
+     {
+-	funcs   = (PFI     *) DXAllocateLocal (todo * sizeof (PFI    ));
++	funcs   = (Error (**)(EXTask, int)) DXAllocateLocal (todo * sizeof (PFI    ));
+ 	args    = (Pointer *) DXAllocateLocal (todo * sizeof (Pointer));
+ 	repeats = (int     *) DXAllocateLocal (todo * sizeof (int    ));
+ 	if (funcs == NULL || args == NULL || repeats == NULL)
+@@ -844,7 +844,7 @@ static Error ExProcessTaskGroup (int syn
+ #ifdef TASK_TIME
+     DXMarkTimeLocal ("queue all tasks");
+ #endif
+-    _dxf_ExRQEnqueueMany (todo, funcs, args, repeats, (long) tg, 0, FALSE);
++    _dxf_ExRQEnqueueMany (todo, (int (**)(Pointer, int))funcs, args, repeats, (long) tg, 0, FALSE);
+ #ifdef TASK_TIME
+     DXMarkTimeLocal ("queued all tasks");
+ #endif
+@@ -974,7 +974,7 @@ void _dxf_ExPrintTaskGroup (EXTaskGroup
+ typedef struct
+ {
+     lock_type	done;			/* set to true when job is done	*/
+-    PFE		func;			/* function to call on processor*/
++    Error (*func)(Pointer);		/* function to call on processor*/
+     Pointer	arg;			/* argument block for the func	*/
+     int		size;			/* size of allocated argument	*/
+     ErrorCode	code;			/* returned error code		*/
+@@ -998,7 +998,7 @@ static Error ExRunOnWorker (EXROJob job,
+  * need to construct the argument block.
+  */
+ 
+-Error _dxf_ExRunOn (int JID, PFE func, Pointer arg, int size)
++Error _dxf_ExRunOn (int JID, Error (*func)(Pointer), Pointer arg, int size)
+ {
+     EXROJob		job	= NULL;
+     ErrorCode		ecode;
+@@ -1034,7 +1034,7 @@ Error _dxf_ExRunOn (int JID, PFE func, P
+     DXcreate_lock(&job->done, "Job");
+     DXlock(&job->done, exJID);
+ 
+-    _dxf_ExRQEnqueue (ExRunOnWorker, (Pointer) job, 1, 0, JID, TRUE);
++    _dxf_ExRQEnqueue ((Error (*)(Pointer, int))ExRunOnWorker, (Pointer) job, 1, 0, JID, TRUE);
+ 
+     DXlock(&job->done, exJID);
+     DXunlock(&job->done, exJID);
+@@ -1061,7 +1061,7 @@ error:
+ 
+ 
+ Error
+-_dxf_ExRunOnAll (PFE func, Pointer arg, int size)
++_dxf_ExRunOnAll (Error (*func)(Pointer), Pointer arg, int size)
+ {
+     int		i;
+     Error	ret=OK;
+--- dx-4.4.4/src/exec/dpexec/task.h.orig	2006-01-05 23:55:42.000000000 +0100
++++ dx-4.4.4/src/exec/dpexec/task.h	2026-02-04 21:36:16.823625084 +0100
+@@ -33,7 +33,7 @@ typedef struct _EXTask
+ {
+     EXTaskGroup         tg;                     /* control block        */
+     float               work;                   /* work estimate        */
+-    PFE                 func;                   /* function to call     */
++    Error (*func)(Pointer, int);                /* function to call     */
+     int                 repeat;                 /* number of requested reps */
+     int                 nocopy;                 /* just pass arg flag   */
+     int                 exdelete;                 /* 1->not in `tasks' array */
+@@ -68,7 +68,7 @@ typedef struct
+ 
+ void            _dxf_ExPrintTask                (EXTask t);
+ void            _dxf_ExPrintTaskGroup   (EXTaskGroup tg);
+-Error 		_dxf_ExInitTaskPerProc();
++Error 		_dxf_ExInitTaskPerProc(void);
+ Error 		_dxf_ExInitTask(int n);
+ 
+ 
+--- dx-4.4.4/src/exec/dpexec/loader.h.orig	2000-08-11 17:28:12.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/loader.h	2026-02-05 20:09:32.716210884 +0100
+@@ -14,9 +14,10 @@
+ 
+ #include "utils.h"
+ 
++typedef int (*DXEntryFunc)(int *, void*);
+ Error DXLoadAndRunObjFile (char *fname, char *envvar);
+ Error DXUnloadObjFile (char *fname, char *envvar);
+-PFI   DXLoadObjFile (char *fname, char *envvar);
++DXEntryFunc DXLoadObjFile (char *fname, char *envvar);
+ Error _dxf_fileSearch(char *inname, char **outname, char *extension,
+                       char *environment);
+ 
+--- dx-4.4.4/src/exec/dpexec/userinter.c.orig	2000-07-31 17:10:37.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/userinter.c	2026-02-05 20:09:54.762996264 +0100
+@@ -23,7 +23,7 @@ Error
+ _dxfLoadUserInteractors(char *fname)
+ {
+     char *path = (char *)getenv("DXUSERINTERACTORS");
+-    int (*func)() = DXLoadObjFile(fname, path);
++    int (*func)(int *, void **) = (int (*)(int *, void **))DXLoadObjFile(fname, path);
+     if (! func)
+ 	DXWarning("unable to open user interactor file %s", fname);
+     else
+--- dx-4.4.4/src/exec/dpexec/variable.c.orig	2000-07-31 17:10:38.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/variable.c	2026-02-05 20:12:26.213811758 +0100
+@@ -119,7 +119,7 @@ _dxf_ExGVariableGetStr(char *var)
+     va = (vargetArg *) DXAllocate(sizeof(vargetArg));
+     va->name = var;
+     va->obj = NULL;
+-    _dxf_ExRunOn (1, ExVariableGet, (Pointer)va, 0);
++    _dxf_ExRunOn (1, (Error (*)(Pointer))ExVariableGet, (Pointer)va, 0);
+     if (DXExtractString ((Object)va->obj, &val) == NULL)
+         val = NULL;
+     DXFree(va);
+@@ -205,11 +205,11 @@ Error DXSetVariable(char *name, Object o
+     va->obj = obj;
+     va->cause_execution = cause_execution;
+     if(sync) {
+-        ret = _dxf_ExRunOn (1, ExVariableSet, va, 0);
++        ret = _dxf_ExRunOn (1, (Error (*)(Pointer))ExVariableSet, va, 0);
+         return(ret);
+     }
+     else {
+-        _dxf_ExRQEnqueue(ExVariableSet, (Pointer)va, 1, 0, 1, 0);
++        _dxf_ExRQEnqueue((int (*)(Pointer, int))ExVariableSet, (Pointer)va, 1, 0, 1, 0);
+         return(OK);
+     }
+ 
+@@ -236,7 +236,7 @@ Error DXGetVariable(char *name, Object *
+ 
+     va = (vargetArg *) DXAllocate(sizeof(vargetArg));
+     va->name = name;
+-    ret = _dxf_ExRunOn (1, ExVariableGet, va, 0);
++    ret = _dxf_ExRunOn (1, (Error (*)(Pointer))ExVariableGet, va, 0);
+ 
+     if (ret == OK)
+ 	*obj = va->obj;
+--- dx-4.4.4/src/exec/dpexec/vcr.c.orig	2000-07-31 17:10:38.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/vcr.c	2026-02-05 20:12:59.840659491 +0100
+@@ -436,7 +436,7 @@ void _dxf_ExVCRCommand (int comm, long a
+ 	arg->comm = comm;
+ 	arg->arg1 = arg1;
+ 	arg->arg2 = arg2;
+-	_dxf_ExRQEnqueue (VCRCommandTask, (Pointer) arg, 1, 0, 1, FALSE);
++	_dxf_ExRQEnqueue ((int (*)(Pointer, int))VCRCommandTask, (Pointer) arg, 1, 0, 1, FALSE);
+ 	return;
+     }
+ 
+#--- dx-4.4.4/src/exec/dpexec/yuiif.c.orig	2006-01-09 23:57:35.000000000 +0100
+#+++ dx-4.4.4/src/exec/dpexec/yuiif.c	2026-02-05 20:21:02.833260190 +0100
+#@@ -240,6 +240,7 @@
+# /*    "IBM PUBLIC LICENSE - Open Visualization Data Explorer"          */
+# /***********************************************************************/
+# 
+#+typedef union YYSTYPE YYSTYPE;
+# 
+# #define DXD_ENABLE_SOCKET_POINTERS	/* define SFILE in arch.h, os2 */
+# #include <dx/dx.h>
+--- dx-4.4.4/src/exec/dpexec/evalgraph.c.orig	2003-07-12 02:12:03.000000000 +0200
++++ dx-4.4.4/src/exec/dpexec/evalgraph.c	2026-02-05 21:12:01.466409284 +0100
+@@ -835,7 +835,7 @@ ExStartModules(Program *p)
+ 		if (!IsSwitch(gf) && !IsRoute(gf))
+ 		    gf->required = RUNNING;
+ 		p->cursor = i;
+-		_dxf_ExRQEnqueue(_execGnode, (Pointer) ta, 1, 0, procId, FALSE);
++		_dxf_ExRQEnqueue((int (*)(Pointer, int))_execGnode, (Pointer) ta, 1, 0, procId, FALSE);
+ 		break;
+ 	    }
+ 	}
+@@ -856,7 +856,7 @@ ExStartModules(Program *p)
+ 	    p->cursor = p->first_skipped - 1;
+ 	    ExDebug("5", "Should reset cursor to %d at this point", p->first_skipped);
+ 	    p->first_skipped = -1;
+-	    _dxf_ExRQEnqueue(_QueueableStartModules, (Pointer) p,
++	    _dxf_ExRQEnqueue((int (*)(Pointer, int))_QueueableStartModules, (Pointer) p,
+ 			     1, 0, 0, FALSE);
+             return;
+ 	}
+@@ -868,7 +868,7 @@ ExStartModules(Program *p)
+             p->loopctl.first = FALSE;
+             p->loopctl.counter++;
+             MARK_1("rerun loop");
+-            _dxf_ExRunOn(1, ExQueueSubGraph, (Pointer)p, 0);
++            _dxf_ExRunOn(1, (Error (*)(Pointer))ExQueueSubGraph, (Pointer)p, 0);
+             return;
+         }
+ 
+@@ -948,7 +948,7 @@ ExStartModules(Program *p)
+ 	    {
+ 	        if(nfuncs > 0 && !p->deleted && !p->waited) {
+ 		    p->waited = TRUE;
+-                    _dxf_ExRunOn(1, _dxf_ExWaitOnSlaves, NULL, 0);
++                    _dxf_ExRunOn(1, (Error (*)(Pointer))_dxf_ExWaitOnSlaves, NULL, 0);
+                 }
+ 		if (p->outstandingRequests == 0)
+ 		    _dxf_ExGQDecrement(p);
+@@ -1402,7 +1402,7 @@ _execGnode(Pointer ptr)
+                      */
+                     INCR_RUNABLE
+                     MARK_1("queue sub graph");
+-                    _dxf_ExRunOn(1, ExQueueSubGraph, (Pointer)n->func.subP, 0);
++                    _dxf_ExRunOn(1, (Error (*)(Pointer))ExQueueSubGraph, (Pointer)n->func.subP, 0);
+                     status = OK;
+                 }
+                 else
+@@ -2890,7 +2890,7 @@ ExProcessDPSENDFunction(Program *p, gfun
+         args->procid = tgprocid, 
+         args->pv = pv;
+         args->index = outdex;
+-        _dxf_ExRunOn(1, QueueSendRequest, args, 0);
++        _dxf_ExRunOn(1, (Error (*)(Pointer))QueueSendRequest, args, 0);
+         DXFree(args);
+         return(OK);
+     }
+@@ -3136,7 +3136,7 @@ _dxf_ExMarkVarRequired(int gid, int sgid
+     subp->cursor = -1;
+     ExDoPreExecPreparation(subp);
+     subp->outstandingRequests++;
+-    _dxf_ExRQEnqueue(_QueueableStartModulesReset,
++    _dxf_ExRQEnqueue((int (*)(Pointer, int))_QueueableStartModulesReset,
+ 		     (Pointer) subp, 1, 0, 0, FALSE);
+ }
+ 
+--- dx-4.4.4/src/exec/dpexec/loader.c.orig	2005-12-26 22:52:26.000000000 +0100
++++ dx-4.4.4/src/exec/dpexec/loader.c	2026-02-05 21:23:52.690268828 +0100
+@@ -97,7 +97,7 @@ typedef int Handle;
+ #ifdef DXD_WIN
+ #define EntryPt	FARPROC
+ #else
+-typedef int (*EntryPt)();
++typedef DXEntryFunc EntryPt;
+ #endif
+ 
+ /* current load state */
+@@ -443,10 +443,10 @@ Error DXUnloadObjFile(char *fname, char
+ 
+ 
+ 
+-PFI DXLoadObjFile(char *fname, char *envvar)
++DXEntryFunc DXLoadObjFile(char *fname, char *envvar)
+ {
+     Handle handle;
+-    int (*func)();
++    DXEntryFunc func;
+     char *foundname = NULL;
+     struct loadtable *lp = NULL;
+ 
+@@ -482,7 +482,7 @@ PFI DXLoadObjFile(char *fname, char *env
+ 	return NULL;
+     }
+ 
+-    if ((func = (PFI)dlsym(handle, "DXEntry")) == NULL) {
++    if ((func = (DXEntryFunc)dlsym(handle, "DXEntry")) == NULL) {
+ 	DXSetError(ERROR_DATA_INVALID, 
+ 		   "cannot find entry point 'DXEntry' in file '%s'", foundname);
+ 	DXFree((Pointer)foundname);
+@@ -500,7 +500,7 @@ PFI DXLoadObjFile(char *fname, char *env
+ 
+ Error DXLoadAndRunObjFile(char *fname, char *envvar)
+ {
+-    int (*func)();
++    DXEntryFunc func;
+     
+     func = DXLoadObjFile(fname, envvar);
+     if (func == NULL)
+@@ -511,7 +511,7 @@ Error DXLoadAndRunObjFile(char *fname, c
+     if (DXQueryDebug("L"))
+         DXEnableDebug("F", 1);
+ 	
+-    (*func)();
++    (*func)(NULL, NULL);
+     
+     if (DXQueryDebug("L"))
+         DXEnableDebug("F", 0);
+--- dx-4.4.4/src/uipp/base/help.c.orig	2003-07-12 02:12:15.000000000 +0200
++++ dx-4.4.4/src/uipp/base/help.c	2026-02-05 21:39:42.168809164 +0100
+@@ -72,7 +72,7 @@ char* mktemp(char*);
+ extern char* mktemp(char*);
+ #endif
+ 
+-extern void RemoveHelpIndexFileCB();
++extern void RemoveHelpIndexFileCB(Widget, XtPointer, XtPointer);
+ 
+ extern void PushMenu(Widget, UserData*, LinkType, char*); /* from history.c */
+ extern int  SearchList(SpotList *, char *); /* from helplist.c */
+@@ -86,14 +86,13 @@ Bool HelpOn(Widget, int, char *, char *,
+ /*
+  * CALLBACK PROCEDURE DECLARATIONS
+  */
+-extern void CloseCB();
+-extern void GoBackCB();
+-extern void LinkCB();
+-extern void DestroyCB();
+-
+-extern XmFontList FONT_LIST();
+-extern int SendWidgetText(); 
+-extern SpotList *NewList();
++extern void CloseCB(Widget, XtPointer, XtPointer);
++extern void GoBackCB(Widget, XtPointer, XtPointer);
++extern void LinkCB(Widget, XtPointer, XtPointer);
++extern void DestroyCB(Widget, XtPointer, XtPointer);
++
++extern int SendWidgetText(Widget, FILE *, Bool, char *); 
++extern SpotList *NewList(void);
+ 
+ 
+ static char ReadmeNotAvailable[] = "HelpNotAvailable";
+--- dx-4.4.4/src/uipp/base/history.c.orig	2002-03-25 17:42:03.000000000 +0100
++++ dx-4.4.4/src/uipp/base/history.c	2026-02-05 21:40:51.315859045 +0100
+@@ -22,7 +22,7 @@
+ #include "help.h"
+ 
+ extern Bool HelpOn(Widget, int, char *, char *, int); /* from help.c */
+-extern unsigned long COLOR();
++extern unsigned long COLOR(Widget, char *);
+ 
+ 
+ /*****************************************************************************/
+--- dx-4.4.4/src/uipp/base/parse.c.orig	2002-03-25 17:42:03.000000000 +0100
++++ dx-4.4.4/src/uipp/base/parse.c	2026-02-05 21:42:39.513125343 +0100
+@@ -39,11 +39,10 @@ char *GetMathToken(FILE **mathfile, char
+ 
+ /* external routines */
+ 
+-extern void   Push();
+-extern char  *Pop(); 
+-extern void   DoRedrawText();
+-extern Stack *NewStack();
+-extern char  *Top();
++extern void   Push(Stack *, char *);
++extern char  *Pop(Stack *); 
++extern Stack *NewStack(void);
++extern char  *Top(Stack *);
+ extern void FreeSpotList(SpotList *); /* from helplist.c */
+ extern void InsertList(SpotList *, ListNodeType *); /* from helplist.c */
+ 
+--- dx-4.4.4/src/uipp/dxl/conn.c.orig	2026-02-05 21:24:42.957209035 +0100
++++ dx-4.4.4/src/uipp/dxl/conn.c	2026-02-05 21:50:08.978949599 +0100
+@@ -523,7 +523,7 @@ DXLStartDX(const char *string, const cha
+ 
+ void
+ DXLSetBrokenConnectionCallback(DXLConnection *connection,
+-				void (*proc)(), void *data)
++				void (*proc)(DXLConnection *, void *), void *data)
+ {
+     connection->brokenConnectionCallback = proc;
+     connection->brokenConnectionCallbackData = data;
+--- dx-4.4.4/src/uipp/widgets/ColorMapEditor.c.orig	2003-09-27 00:09:40.000000000 +0200
++++ dx-4.4.4/src/uipp/widgets/ColorMapEditor.c	2026-02-05 21:55:21.624006526 +0100
+@@ -91,12 +91,12 @@ void SetRGBLines( XColor* cells, Control
+ 
+ /*  Class and internal functions  */
+ 
+-static void    ClassInitialize();
+-static void    Initialize();
+-static void    Resize();
+-static void    Realize();
+-static void    Destroy();
+-static Boolean SetValues();
++static void    ClassInitialize(void);
++static void    Initialize(XmColorMapEditorWidget, XmColorMapEditorWidget);
++static void    Resize(Widget);
++static void    Realize(XmColorMapEditorWidget, XtValueMask *, XSetWindowAttributes *);
++static void    Destroy(XmColorMapEditorWidget);
++static Boolean SetValues(XmColorMapEditorWidget, XmColorMapEditorWidget, XmColorMapEditorWidget);
+ static void    exposeCME(XmColorMapEditorWidget, XExposeEvent *, Region);
+ void update_callback(ControlField *field);
+ 
+@@ -202,9 +202,9 @@ XmColorMapEditorClassRec xmColorMapEdito
+     /* class_initialize   */    ClassInitialize,
+     /* class_part_initiali*/	NULL,
+     /* class_inited       */	FALSE,
+-    /* initialize	  */	Initialize,
++    /* initialize	  */	(XtInitProc)Initialize,
+     /* initialize_hook    */	NULL,
+-    /* realize		  */	Realize,
++    /* realize		  */	(XtRealizeProc)Realize,
+     /* actions		  */    NULL,
+     /* num_actions	  */	0,
+     /* resources	  */	resources,
+@@ -214,10 +214,10 @@ XmColorMapEditorClassRec xmColorMapEdito
+     /* compress_exposure  */	TRUE,
+     /* compress_enterleave*/	TRUE,
+     /* visible_interest	  */	FALSE,
+-    /* destroy		  */	Destroy,
+-    /* resize		  */	Resize,
++    /* destroy		  */	(XtWidgetProc)Destroy,
++    /* resize		  */	(XtWidgetProc)Resize,
+     /* expose		  */	(XtExposeProc)exposeCME,
+-    /* set_values	  */	SetValues,
++    /* set_values	  */	(XtSetValuesFunc)SetValues,
+     /* set_values_hook	  */	NULL,
+     /* set_values_almost  */	XtInheritSetValuesAlmost,
+     /* get_values_hook    */	NULL,
+--- dx-4.4.4/src/uipp/widgets/Dial.c.orig	2005-12-30 20:36:10.000000000 +0100
++++ dx-4.4.4/src/uipp/widgets/Dial.c	2026-02-05 22:05:36.320728645 +0100
+@@ -60,37 +60,37 @@
+ #   define trunc(x) ((double)((int)(x)))
+ #endif
+ 
+-static  double  _dxf_round();
+-static	void	xm_cvt_str_to_dbladdr();
+-static  void    xm_cvt_str_to_clock();
+-static	void	ClassInitialize();
+-static  void    Initialize();
+-static  void    Redisplay();
+-static  void    Resize();
+-static  Boolean	SetValues();
+-static  void    Destroy();
+-static  void    select_dial();
+-static  void    shading_on_dial();
+-static  void    shading_off_dial();
+-static  void    motion_dial();
+-static  void    validate_max();
+-static  void    validate_incr();
+-static  void    validate_per_marker();
+-static  void    validate_num_markers();
+-static  void    validate_maj_width();
+-static  void    validate_min_width();
+-static  void    validate_maj_pos();
+-static  void    validate_start_pos();
+-static  void    validate_pos();
+-static  void    validate_ind_width();
+-static	void	calc_markers();
+-static	void	calculate_indicator_pos();
+-static	void	draw_3dshadow();
+-static  void    draw_indicator();
+-static	void	draw_shading();
+-static	void	get_shade_GCs();
+-static 	double 	calculate_angle_diff();
+-static	double	norm_angle();
++static  double  _dxf_round(double, int);
++static	void	xm_cvt_str_to_dbladdr(XrmValue *, Cardinal *, XrmValue *, XrmValue *);
++static  void    xm_cvt_str_to_clock(XrmValue *, Cardinal *, XrmValue *, XrmValue *);
++static	void	ClassInitialize(WidgetClass);
++static  void    Initialize(XmDialWidget, XmDialWidget);
++static  void    Redisplay(XmDialWidget, XEvent *, Region);
++static  void    Resize(XmDialWidget);
++static  Boolean	SetValues(XmDialWidget, XmDialWidget, XmDialWidget);
++static  void    Destroy(XmDialWidget);
++static  void    select_dial(XmDialWidget, XEvent *, char *[], int);
++static  void    shading_on_dial(XmDialWidget, XEvent *, char *[], int);
++static  void    shading_off_dial(XmDialWidget, XEvent *, char *[], int);
++static  void    motion_dial(XmDialWidget, XtPointer, XEvent *);
++static  void    validate_max(XmDialWidget, double);
++static  void    validate_incr(XmDialWidget, double);
++static  void    validate_per_marker(XmDialWidget, int);
++static  void    validate_num_markers(XmDialWidget, int);
++static  void    validate_maj_width(XmDialWidget, int);
++static  void    validate_min_width(XmDialWidget, int);
++static  void    validate_maj_pos(XmDialWidget, int);
++static  void    validate_start_pos(XmDialWidget, int);
++static  void    validate_pos(XmDialWidget, int);
++static  void    validate_ind_width(XmDialWidget, int);
++static	void	calc_markers(XmDialWidget);
++static	void	calculate_indicator_pos(XmDialWidget);
++static	void	draw_3dshadow(XmDialWidget);
++static  void    draw_indicator(XmDialWidget, GC);
++static	void	draw_shading(XmDialWidget, GC);
++static	void	get_shade_GCs(XmDialWidget);
++static 	double 	calculate_angle_diff(double, double);
++static	double	norm_angle(double);
+ 
+ static	char	defaultTranslations[] = " <Btn1Down>: 	select() 	\n\
+ 					<Btn1Motion>: 	select() 	\n\
+@@ -207,10 +207,10 @@ XmDialClassRec	XmdialClassRec =
+ 	(WidgetClass) &xmPrimitiveClassRec, /* superclass	*/
+ 	"XmDial",			/* class_name		*/
+ 	sizeof(XmDialRec),		/* widget_size		*/
+-	ClassInitialize, 		/* class_initialize	*/
++	(XtProc)ClassInitialize, 	/* class_initialize	*/
+ 	NULL,				/* class_part_initialize */
+ 	FALSE,				/* class_inited		*/
+-	Initialize,			/* initialize		*/
++	(XtInitProc)Initialize,		/* initialize		*/
+ 	NULL,				/* initialize_hook	*/
+ 	XtInheritRealize,		/* realize		*/
+ 	actionsList,			/* actions		*/
+@@ -222,10 +222,10 @@ XmDialClassRec	XmdialClassRec =
+ 	TRUE,				/* compress_exposure	*/
+ 	TRUE,       			/* compress_enterleave 	*/
+ 	FALSE,       			/* visible_interest	*/
+-	Destroy,			/* destroy		*/
+-	Resize,				/* resize		*/
+-	Redisplay,			/* expose		*/
+-	SetValues,			/* set_values		*/
++	(XtWidgetProc)Destroy,		/* destroy		*/
++	(XtWidgetProc)Resize,		/* resize		*/
++	(XtExposeProc)Redisplay,	/* expose		*/
++	(XtSetValuesFunc)SetValues,	/* set_values		*/
+ 	NULL,				/* set_values_hook	*/
+ 	XtInheritSetValuesAlmost,	/* set_values_almost	*/
+ 	NULL,				/* get_values_hook	*/
+@@ -806,7 +806,7 @@ int             n_args;
+ 	 */
+ 	if (w->dial.shading)
+ 		{
+-		XtAddEventHandler((Widget)w,PointerMotionMask,FALSE,motion_dial,NULL);
++		XtAddEventHandler((Widget)w,PointerMotionMask,FALSE,(XtEventHandler)motion_dial,NULL);
+ 		w->dial.shading_active = TRUE;
+ 		}
+         if (event->type == ButtonRelease)
+@@ -829,7 +829,7 @@ int             n_args;
+ 	if (w->dial.shading_active)
+ 		{
+ 		XtRemoveEventHandler((Widget)w,PointerMotionMask,FALSE,
+-			motion_dial,NULL);
++			(XtEventHandler)motion_dial,NULL);
+ 		draw_shading(w,w->dial.inverse_GC);
+ 		draw_indicator(w,w->dial.indicator_GC);
+ 		w->dial.shading_active = FALSE;
+--- dx-4.4.4/src/uipp/widgets/NumericList.c.orig	2002-03-25 17:42:41.000000000 +0100
++++ dx-4.4.4/src/uipp/widgets/NumericList.c	2026-02-05 22:29:37.341979524 +0100
+@@ -54,13 +54,13 @@ static void print_vector(XmNumericListWi
+ static void do_layout(XmNumericListWidget nlw);
+ static void MakeGC ( XmNumericListWidget w);
+ static void copy_vectors(XmNumericListWidget nlw, int old_n_vectors);
+-static void Arm();
+-static void Activate();
+-static void decrement_if_possible();
+-static void increment_if_possible();
++static void Arm(XmNumericListWidget, XEvent *, String *, Cardinal *);
++static void Activate(XmNumericListWidget, XEvent *, String *, Cardinal *);
++static void decrement_if_possible(XmNumericListWidget, XtIntervalId *);
++static void increment_if_possible(XmNumericListWidget, XtIntervalId *);
+ static void jump_to_end(XmNumericListWidget nlw);
+ static void set_decimal_places(XmNumericListWidget nlw);
+-static void BtnMotion();
++static void BtnMotion(XmNumericListWidget, XEvent *, String *, Cardinal *);
+ 
+ #define STRCMP(a,b)  ((a) ? ((b) ? strcmp(a,b) : strcmp(a,"")) : \
+ 			    ((b) ? strcmp("",b) : 0))
+@@ -665,7 +665,7 @@ Arg     wargs[10];
+ 	    {
+ 	    nlw->numeric_list.tid = 
+ 			XtAppAddTimeOut(XtWidgetToApplicationContext((Widget)nlw),
+-				100, decrement_if_possible, nlw);
++				100, (XtTimerCallbackProc)decrement_if_possible, nlw);
+ 	    nlw->numeric_list.decrementing = True;
+ 	    return;
+ 	    }
+@@ -678,7 +678,7 @@ Arg     wargs[10];
+ 	    {
+ 	    nlw->numeric_list.tid = 
+ 			XtAppAddTimeOut(XtWidgetToApplicationContext((Widget)nlw),
+-				100, increment_if_possible, nlw);
++				100, (XtTimerCallbackProc)increment_if_possible, nlw);
+ 	    nlw->numeric_list.incrementing = True;
+ 	    return;
+ 	    }
+@@ -691,7 +691,7 @@ Arg     wargs[10];
+ 	    XtRemoveTimeOut(nlw->numeric_list.tid);
+ 	    nlw->numeric_list.tid = 
+ 			XtAppAddTimeOut(XtWidgetToApplicationContext((Widget)nlw),
+-				100, decrement_if_possible, nlw);
++				100, (XtTimerCallbackProc)decrement_if_possible, nlw);
+ 	    nlw->numeric_list.incrementing = False;
+ 	    nlw->numeric_list.decrementing = True;
+ 	    return;
+@@ -706,7 +706,7 @@ Arg     wargs[10];
+ 	    XtRemoveTimeOut(nlw->numeric_list.tid);
+ 	    nlw->numeric_list.tid = 
+ 			XtAppAddTimeOut(XtWidgetToApplicationContext((Widget)nlw),
+-				100, increment_if_possible, nlw);
++				100, (XtTimerCallbackProc)increment_if_possible, nlw);
+ 	    nlw->numeric_list.decrementing = False;
+ 	    nlw->numeric_list.incrementing = True;
+ 	    return;
+--- dx-4.4.4/src/uipp/widgets/MultiText.c.orig	2026-02-05 21:24:42.970542441 +0100
++++ dx-4.4.4/src/uipp/widgets/MultiText.c	2026-02-05 22:30:51.712388058 +0100
+@@ -63,7 +63,7 @@
+ /*
+  * Forward declaration of methods:
+  */
+-static void ClassInitialize();
++static void ClassInitialize(WidgetClass);
+ 
+ static void Initialize(Widget, Widget, ArgList, Cardinal*);
+ 
+@@ -73,7 +73,7 @@ static void Redisplay(Widget, XEvent*, R
+ 
+ static void Resize(Widget);
+ 
+-static Boolean SetValues();
++static Boolean SetValues(XmMultiTextWidget, XmMultiTextWidget, XmMultiTextWidget);
+ 
+ /*
+  * Private routines used by the XmMultiTextWidget.
+@@ -433,7 +433,7 @@ XmMultiTextClassRec xmMultiTextClassRec
+ 					/* superclass			*/
+ 	"XmMultiText",			/* class_name			*/
+ 	sizeof(XmMultiTextRec),		/* widget_size			*/
+-	ClassInitialize,		/* class_initialize		*/
++	(XtProc)ClassInitialize,	/* class_initialize		*/
+ 	NULL,				/* class_part_initialize 	*/
+ 	FALSE,				/* class_inited			*/
+ 	Initialize,			/* initialize			*/	
+--- dx-4.4.4/src/uipp/widgets/Picture.c.orig	2003-07-12 02:12:30.000000000 +0200
++++ dx-4.4.4/src/uipp/widgets/Picture.c	2026-02-06 06:24:53.414455405 +0100
+@@ -61,7 +61,7 @@ static void   generate_globe(XmPictureWi
+ static void   keyboard_grab(XmPictureWidget w, Boolean grab);
+ static void   restore_rectangle(XmPictureWidget w);
+ static void   erase_image(XmPictureWidget w);
+-static double line_of_sight();
++static double line_of_sight(XmPictureWidget, double, double, double[4][4], double[4][4]);
+ static void   setup_bounding_box(XmPictureWidget w);
+ static void   calc_projected_axis(XmPictureWidget w);
+ static void   setup_gnomon(XmPictureWidget w, Boolean rotate);
+@@ -97,9 +97,9 @@ XmPictureMoveCamera( XmPictureWidget w,
+ 		 double *up_newx, double *up_newy, double *up_newz);
+ 
+ 
+-static int    inverse(), mult44();
+-static double cofac(), det33() ;
+-static int    find_closest(), draw_cursors();
++static int    inverse(double[4][4], double[4][4]), mult44(double[4][4], double[4][4]);
++static double cofac(double[4][4], int, int), det33(double[4][4]) ;
++static int    find_closest(XmPictureWidget, int, int), draw_cursors(XmPictureWidget);
+ static int    set_rot ( double res[4][4],  double s0, short s1 );
+ static int    I44(double w[4][4]);
+ static int    set_trans(double res[4][4] , double s0, short s1);
+@@ -126,20 +126,20 @@ static Boolean SetValues( XmPictureWidge
+ 			  XmPictureWidget request,
+ 			  XmPictureWidget new );
+ 
+-static void    ClassInitialize();
+-static void    Destroy();
++static void    ClassInitialize(void);
++static void    Destroy(XmPictureWidget);
+ 
+-static void    Select();
+-static void    Deselect();
+-static void    CreateDelete();
+-static void    BtnMotion();
+-static void    KeyProc();
++static void    Select(XmPictureWidget, XEvent *);
++static void    Deselect(XmPictureWidget, XEvent *);
++static void    CreateDelete(XmPictureWidget, XEvent *);
++static void    BtnMotion(XmPictureWidget, XEvent *);
++static void    KeyProc(XmPictureWidget, XEvent *);
+ #if 0
+ static void    KeyMode();
+ #endif
+ static void    ServerMessage (XmPictureWidget w, XEvent *event);
+ static void    PropertyNotifyAR (XmPictureWidget w, XEvent *event);
+-static void    Realize();
++static void    Realize(XmPictureWidget, XtValueMask *, XSetWindowAttributes *);
+ static void    Redisplay (XmPictureWidget ww,
+ 			  XExposeEvent* event,
+ 			  Region region);
+@@ -402,7 +402,7 @@ XmPictureClassRec xmPictureClassRec =
+       FALSE,					/* class_inited       */
+       (XtInitProc) Initialize,			/* initialize         */
+       NULL,					/* initialize_hook    */
+-      Realize,				        /* realize            */
++      (XtRealizeProc)Realize,		        /* realize            */
+       actionsList,				/* actions	      */
+       XtNumber(actionsList),			/* num_actions	      */
+       resources,				/* resources          */
+@@ -412,7 +412,7 @@ XmPictureClassRec xmPictureClassRec =
+       TRUE,					/* compress_exposure  */
+       TRUE,					/* compress_enterlv   */
+       FALSE,					/* visible_interest   */
+-      Destroy,					/* destroy            */
++      (XtWidgetProc)Destroy,			/* destroy            */
+       (XtWidgetProc) Resize, 		   	/* resize	      */
+       (XtExposeProc)Redisplay,			/* expose             */
+       (XtSetValuesFunc) SetValues,		/* set_values         */
+--- dx-4.4.4/src/uipp/widgets/Slider.c.orig	2002-01-13 07:02:08.000000000 +0100
++++ dx-4.4.4/src/uipp/widgets/Slider.c	2026-02-06 06:26:17.738255235 +0100
+@@ -102,11 +102,10 @@ static double widgetnumber2appl( XmSlide
+ 		                 int number );
+ static int appl2widgetnumber( XmSliderWidget slider,
+ 		              double application_number );
+-static  double  _dxf_round();
++static  double  _dxf_round(double, int);
+ 
+ 
+ extern void _XmForegroundColorDefault();
+-extern void _XmBackgroundColorDefault();
+ 
+ /* Declare defaults */
+ #define DEF_MIN 1
+--- dx-4.4.4/src/uipp/widgets/VCRControl.c.orig	2005-12-30 20:25:07.000000000 +0100
++++ dx-4.4.4/src/uipp/widgets/VCRControl.c	2026-02-06 17:35:34.052129394 +0100
+@@ -287,17 +287,17 @@ WidgetClass xmVCRControlWidgetClass = (W
+ #define MIN_VAL(a,b) ((a)<(b)?(a):(b))
+ #define superclass (&widgetClassRec)
+ 
+-static void SetLabel();
+-static void CreateVCRCounter();
+-static void VCRButtonResize();
+-static void _VCRButtonEvent();
+-static void VCRButtonEvent();
+-static void VCRButtonExpose();
+-static void VCRCounterExpose();
+-static void ReleaseVCRButton();
+-static void PushVCRButton();
+-static void ReleaseModeButtons();
+-static void ReplaceFrame();
++static void SetLabel(XmVCRControlWidget, int, char *, int, int);
++static void CreateVCRCounter(XmVCRControlWidget);
++static void VCRButtonResize(XmDrawingAreaWidget, XmVCRControlWidget, XmDrawingAreaCallbackStruct *);
++static void _VCRButtonEvent(Widget, XmVCRControlWidget, XEvent *, Boolean *);
++static void VCRButtonEvent(XmDrawingAreaWidget, XmVCRControlWidget, XmDrawingAreaCallbackStruct *);
++static void VCRButtonExpose(XmDrawingAreaWidget, XmVCRControlWidget, XmDrawingAreaCallbackStruct *);
++static void VCRCounterExpose(XmDrawingAreaWidget, XmVCRControlWidget, XmDrawingAreaCallbackStruct *);
++static void ReleaseVCRButton(XmVCRControlWidget, int);
++static void PushVCRButton(XmVCRControlWidget, int);
++static void ReleaseModeButtons(XmVCRControlWidget);
++static void ReplaceFrame(XmFrameWidget);
+ void ChangeVCRStopValue( XmVCRControlWidget vcr, int value, Boolean to_vcr,
+                          Boolean to_frame_control, Boolean to_outside );
+ void ChangeVCRStartValue( XmVCRControlWidget vcr, int value, Boolean to_vcr,
+@@ -309,9 +309,9 @@ void ChangeVCRCurrentValue( XmVCRControl
+ void ChangeVCRIncrementValue( XmVCRControlWidget vcr, int increment,
+                               Boolean to_vcr, Boolean to_frame_control,
+                               Boolean to_outside );
+-static void PopdownCallback();
+-static void map_dialog();
+-static void FrameControlCallback();
++static void PopdownCallback(Widget, XmVCRControlWidget, XmAnyCallbackStruct *);
++static void map_dialog(Widget, XmVCRControlWidget, XmAnyCallbackStruct *);
++static void FrameControlCallback(Widget, XmVCRControlWidget, FrameControlCallbackStruct *);
+ 
+ /*  Subroutine:	Initialize
+  *  Effect:	Create and initialize the component widgets
+@@ -533,7 +533,7 @@ static void SimulateButtonPress(XmVCRCon
+      */
+     call_data.event->xbutton.x = -1;
+     widget = (Widget)vcr->vcr_control.button[button_num];
+-    VCRButtonEvent(widget, vcr, &call_data);
++    VCRButtonEvent((XmDrawingAreaWidget)widget, vcr, &call_data);
+     XtFree((char*)call_data.event);
+ 
+ }
+@@ -729,11 +729,11 @@ static void SetLabel( XmVCRControlWidget
+         (void *)(&vcr->vcr_control.button_image[i]);
+ 
+     XtAddCallback((Widget)vcr->vcr_control.button[i], XmNexposeCallback,
+-                  VCRButtonExpose, vcr);
++                  (XtCallbackProc)VCRButtonExpose, vcr);
+     XtAddCallback((Widget)vcr->vcr_control.button[i], XmNresizeCallback,
+-                  VCRButtonResize, vcr);
++                  (XtCallbackProc)VCRButtonResize, vcr);
+     XtAddCallback((Widget)vcr->vcr_control.button[i], XmNinputCallback,
+-                  VCRButtonEvent, vcr);
++                  (XtCallbackProc)VCRButtonEvent, vcr);
+     XtManageChild((Widget)vcr->vcr_control.button[i]);
+ }
+ 
+@@ -753,9 +753,9 @@ static void CreateVCRCounter( XmVCRContr
+                                                              "label", wargs, 0);
+     XtManageChild((Widget)vcr->vcr_control.button[VCR_COUNT]);
+     XtAddCallback((Widget)vcr->vcr_control.button[VCR_COUNT], XmNexposeCallback,
+-                  VCRCounterExpose, vcr);
++                  (XtCallbackProc)VCRCounterExpose, vcr);
+     XtAddCallback((Widget)vcr->vcr_control.button[VCR_COUNT], XmNinputCallback,
+-                  VCRButtonEvent, vcr);
++                  (XtCallbackProc)VCRButtonEvent, vcr);
+ 
+     /* Create the label */
+     XtSetArg(wargs[0], XmNx, 10);
+@@ -798,9 +798,9 @@ static void CreateVCRCounter( XmVCRContr
+     XtManageChild((Widget)vcr->vcr_control.dot_dot_dot);
+ 
+     XtAddEventHandler((Widget)vcr->vcr_control.label, ButtonPressMask,
+-                      False, _VCRButtonEvent, vcr);
++                      False, (XtEventHandler)_VCRButtonEvent, vcr);
+     XtAddEventHandler((Widget)vcr->vcr_control.dot_dot_dot, ButtonPressMask,
+-                      False, _VCRButtonEvent, vcr);
++                      False, (XtEventHandler)_VCRButtonEvent, vcr);
+ }
+ 
+ 
+--- dx-4.4.4/src/uipp/widgets/WorkspaceW.c.orig	2006-01-05 23:55:56.000000000 +0100
++++ dx-4.4.4/src/uipp/widgets/WorkspaceW.c	2026-02-06 17:37:40.812815324 +0100
+@@ -38,7 +38,7 @@
+ 
+ 
+ /* External functions */
+-extern void ChangeWidgetInCollideList(); /* From Findroute.c */
++extern void ChangeWidgetInCollideList(XmWorkspaceWidget, Widget); /* From Findroute.c */
+ 
+ extern void _XmManagerEnter();
+ extern void _XmManagerFocusIn();
+@@ -2338,7 +2338,7 @@ static void Arm( XmWorkspaceWidget ww, X
+  */
+ static void Disarm( XmWorkspaceWidget ww, XEvent* event )
+ {
+-Boolean bool = True;
++Boolean bool_ = True;
+ 
+     if( ww->workspace.button_tracker != NULL )
+     {
+@@ -2347,7 +2347,7 @@ Boolean bool = True;
+ 	ww->workspace.button_tracker(ww->workspace.track_widget,
+ 	                             ww->workspace.track_client_data,
+ 	                             event
+-				     ,&bool
++				     ,&bool_
+ 				     );
+     }
+     else if( ww->workspace.is_rubberbanding )
+@@ -2457,7 +2457,7 @@ static void KeyboardNavigation( XmWorksp
+  */
+ static void Drag( XmWorkspaceWidget ww, XEvent* event )
+ {
+-Boolean bool = True;
++Boolean bool_ = True;
+ 
+     if (ww->workspace.auto_arrange) return ;
+ 
+@@ -2468,7 +2468,7 @@ Boolean bool = True;
+ 	ww->workspace.button_tracker(ww->workspace.track_widget,
+ 	                             ww->workspace.track_client_data,
+ 	                             event
+-				     ,&bool
++				     ,&bool_
+ 				     );
+     }
+     else if( ww->workspace.is_rubberbanding )
